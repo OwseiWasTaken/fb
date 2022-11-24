@@ -33,15 +33,19 @@ int main ( void ) {
 	fflush(jar.log);
 
 
-	color col = RGB(255,255,255);
+	color white = RGB(255,255,255);
+	color prple = RGB(127,0,255);
+	color green = RGB(0,255,0);
 	int y = 30;
+	int thick = 7;
 
-	ADrawPartLine(jar, y, 100, 400, col, 10);
-	// -struct fbjar jar,
-	// -int y, int StartX, int EndX
-	// -color RGB,
-	// -int thick
-	sleep(1);
+	DrawPartCollum(jar, y, 100, 500, green);
+	DrawPartCollum(jar, y-thick, 50, 200, green);
+	DrawPartCollum(jar, y+thick, 50, 200, green);
+	ADrawPartCollum(jar, y, 100, 400, white, thick);
+	ADrawPartCollum(jar, y, 100, 400, prple, -thick);
+
+	getc(stdin);
 
 	//CloseTerm(jar);
 	// close framebuffer jar
