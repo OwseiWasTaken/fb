@@ -1,7 +1,5 @@
 // advanced version of normal funcs
 
-// storing random shit here
-
 void ADrawPartLine (
 	struct fbjar jar,
 	int y, int StartX, int EndX,
@@ -16,18 +14,19 @@ void ADrawPartLine (
 
 	assert(CheckInjar(jar, y, StartX));
 	assert(CheckInjar(jar, y+thick, EndX));
+	assert(thick!=0);
 
-	char* location = jar.fbmem+GetPixelPos(jar, y, StartX);
+	char* location = GetFbPos(jar, y, StartX);
 	int Xlen = (EndX - StartX)*jar.bpp;
 	int x, i;
 
 	for (i = 0 ; i<thick ; i++) {
-		location += jar.skip;
 		for (x = 0 ; x<Xlen ; x+=jar.bpp) {
 			*(location + 0 + x) = RGB.B;
 			*(location + 1 + x) = RGB.G;
 			*(location + 2 + x) = RGB.R;
 		}
+		location += skip;
 	}
 }
 
