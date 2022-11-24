@@ -150,6 +150,10 @@ inline long int GetPixelPos ( struct fbjar jar, int y, int x ) {
 	return (y+jar.yoff)*jar.skip + (jar.xoff+x)*jar.bpp;
 }
 
+inline char* GetFbPos ( struct fbjar jar, int y, int x ) {
+	return jar.fbmem+((y+jar.yoff)*jar.skip + (jar.xoff+x)*jar.bpp);
+}
+
 bool CheckPIJ (struct fbjar jar, point p) {
 	if (p.y >= jar.rows || p.y < 0 || p.x >= jar.cols || p.x < 0) {
 		fprintf( jar.log,
