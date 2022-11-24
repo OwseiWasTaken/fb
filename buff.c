@@ -33,18 +33,6 @@ int main ( void ) {
 	fflush(jar.log);
 
 
-	color white = RGB(255,255,255);
-	color prple = RGB(127,0,255);
-	color green = RGB(0,255,0);
-	int y = 30;
-	int thick = 7;
-
-	DrawPartCollum(jar, y, 100, 500, green);
-	DrawPartCollum(jar, y-thick, 50, 200, green);
-	DrawPartCollum(jar, y+thick, 50, 200, green);
-	ADrawPartCollum(jar, y, 100, 400, white, thick);
-	ADrawPartCollum(jar, y, 100, 400, prple, -thick);
-
 	getc(stdin);
 
 	//CloseTerm(jar);

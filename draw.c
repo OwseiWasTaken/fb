@@ -87,6 +87,8 @@ void FillSquare (
 
 // simple funcs
 
+//TODO: DrawAllLine/Collum
+
 void SDrawAllLine (struct fbjar jar, int y) {
 	assert(CheckInjar(jar, y, 0));
 
