@@ -22,7 +22,6 @@
 #include "draw/normal.c"
 #include "draw/chars.c"
 
-
 int main ( void ) {
 	HideCursor();
 	struct fbjar jar = InitFb();
@@ -33,15 +32,17 @@ int main ( void ) {
 
 
 	//
-	bool* chr = ExpandMappedChar(chars, 0);
-
-	for (int i = 0 ; i<CHARLEN; i++) {
-		for (int j = 0 ; j<CHARLINELEN ; j++) {
-			fprintf(jar.log, "%s", *(chr+i*CHARLEN+j)?"@":".");
+	for (int i = 0 ; i<CHARLEN*1; i++) {
+		if (i%16 == 0) {
+			fprintf(jar.log, "\nChar:%d\n", i/16);
+		}
+		for (uint j = 0 ; j<CHARLINELEN ; j++) {
+			fprintf(jar.log, "%s", (*(chars + i) & (1<<j))!=0?"@":"·");
 		}
 		fprintf(jar.log, "\n");
 	}
-	DrawChar(jar, chr, 2, 2);
+
+	DrawChar(jar, chars, 0, 0);
 
 	//for (int i = 0 ; i<CHARLEN ; i++) {
 	//	printf("%d:%d\n", i, *(chars+i));
