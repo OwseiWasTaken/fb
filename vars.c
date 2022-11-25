@@ -29,6 +29,9 @@ typedef struct Point point;
 
 //funcs
 
+//TODO: can't write to the end of the screen
+// last 8 lines can't be used
+
 // tbh no idea how this works
 // but it works
 struct fbjar InitFb()
