@@ -1,4 +1,4 @@
 config.vim
 run.sh
 fb
-log.txt
+*.txt
