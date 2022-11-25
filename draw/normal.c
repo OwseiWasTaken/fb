@@ -14,7 +14,7 @@ void TDrawPartLine (
 	assert(CheckInjar(jar, y+thick, EndX));
 	assert(thick!=0);
 
-	char* location = GetFbPos(jar, y, StartX);
+	uint8* location = GetFbPos(jar, y, StartX);
 	int Xlen = (EndX - StartX)*jar.bpp;
 	int x, i;
 
@@ -44,7 +44,7 @@ void TDrawPartCollum (
 	assert(CheckInjar(jar, EndY, x+thick));
 	assert(thick!=0);
 
-	char* location = GetFbPos(jar, StartY, x);
+	uint8* location = GetFbPos(jar, StartY, x);
 	int Ylen = (EndY - StartY);
 	int sk, y, i;
 
@@ -68,7 +68,7 @@ void DrawPartLine (
 	assert(CheckInjar(jar, y, StartX));
 	assert(CheckInjar(jar, y, EndX));
 
-	char* location = GetFbPos(jar, y, StartX);
+	uint8* location = GetFbPos(jar, y, StartX);
 	int Xlen = (EndX - StartX)*jar.bpp;
 	int x;
 
@@ -87,7 +87,7 @@ void DrawPartCollum (
 	assert(CheckInjar(jar, StartY, x));
 	assert(CheckInjar(jar, EndY, x));
 
-	char* location = GetFbPos(jar, StartY, x);
+	uint8* location = GetFbPos(jar, StartY, x);
 	int Ylen = (EndY - StartY);
 	int sk = jar.yoff*jar.skip;
 
@@ -118,7 +118,7 @@ void FillSquare (
 	point top, point bot,
 	color RGB
 ) {
-	char* location = GetFbPos(jar, top.y, top.x);
+	uint8* location = GetFbPos(jar, top.y, top.x);
 	int limy = bot.y*jar.skip;
 	int limx = bot.x*jar.bpp;
 

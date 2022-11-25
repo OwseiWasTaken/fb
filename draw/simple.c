@@ -17,7 +17,7 @@
 void SDrawAllLine (struct fbjar jar, int y) {
 	assert(CheckInjar(jar, y, 0));
 
-	char* location = GetFbPos(jar, y, 0);
+	uint8* location = GetFbPos(jar, y, 0);
 	int x;
 
 	for (x = 0;x<jar.skip;x+=jar.bpp) {
@@ -31,7 +31,7 @@ void SDrawPartLine (struct fbjar jar, int y, int StartX, int EndX) {
 	assert(CheckInjar(jar, y, StartX));
 	assert(CheckInjar(jar, y, EndX));
 
-	char* location = GetFbPos(jar, y, StartX);
+	uint8* location = GetFbPos(jar, y, StartX);
 	int Xlen = (EndX - StartX)*jar.bpp;
 	int x;
 
@@ -49,7 +49,7 @@ void SDrawPartCollum (
 	assert(CheckInjar(jar, StartY, x));
 	assert(CheckInjar(jar, EndY, x));
 
-	char* location = GetFbPos(jar, StartY, x);
+	uint8* location = GetFbPos(jar, StartY, x);
 	int Ylen = (EndY - StartY);
 	int sk = jar.yoff*jar.skip;
 
@@ -77,7 +77,7 @@ void SFillSquare (
 ) {
 	assert(CheckPIJ(jar, top));
 	assert(CheckPIJ(jar, bot));
-	char* location = GetFbPos(jar, top.y, top.x);
+	uint8* location = GetFbPos(jar, top.y, top.x);
 	int limy = bot.y*jar.skip;
 	int limx = bot.x*jar.bpp;
 	for (int i = 0; i < limy ; i+=jar.skip ) {

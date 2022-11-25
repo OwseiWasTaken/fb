@@ -5,7 +5,7 @@ typedef char int8;
 
 // complex defs
 struct fbjar {
-	char* fbmem;
+	uint8* fbmem;
 	int bpp; // bytes per pixel
 	int xoff, yoff;
 	int skip; // skip from y to y+1 (in bytes)
@@ -37,7 +37,7 @@ typedef struct Point point;
 struct fbjar InitFb()
 {
 	int fbfd = 0;
-	char *fbp = 0;
+	uint8 *fbp = 0;
 	long int screensize = 0;
 	struct fb_var_screeninfo vinfo;
 	struct fb_fix_screeninfo finfo;
@@ -62,7 +62,7 @@ struct fbjar InitFb()
 	// Figure out the size of the screen in bytes
 	screensize = vinfo.xres * vinfo.yres * vinfo.bits_per_pixel / 8;
 	// Map the device to memory
-	fbp = (char *)mmap(0, screensize, PROT_READ | PROT_WRITE, MAP_SHARED, fbfd, 0);
+	fbp = (uint8 *)mmap(0, screensize, PROT_READ | PROT_WRITE, MAP_SHARED, fbfd, 0);
 	if ( *fbp == -1) {
 		perror("Error: failed to map framebuffer device to memory");
 		exit(4);
@@ -137,7 +137,7 @@ point MakePoint(int y, int x) {
 	return p;
 }
 
-color RGB(char R, char G, char B) {
+color RGB(uint8 R, uint8 G, uint8 B) {
 	color c = {.R = R, .G = G, .B = B};
 	return c;
 }
@@ -153,7 +153,7 @@ inline long int GetPixelPos ( struct fbjar jar, int y, int x ) {
 	return (y+jar.yoff)*jar.skip + (jar.xoff+x)*jar.bpp;
 }
 
-inline char* GetFbPos ( struct fbjar jar, int y, int x ) {
+inline uint8* GetFbPos ( struct fbjar jar, int y, int x ) {
 	return jar.fbmem+((y+jar.yoff)*jar.skip + (jar.xoff+x)*jar.bpp);
 }
 
