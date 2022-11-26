@@ -18,21 +18,6 @@ uint8* ReadChars (int len) {
 	//}
 //}
 
-bool* ExpandChar(uint8* from) {
-	bool *ch = malloc(CHARLEN);
-	for (int i = 0 ; i<CHARLEN; i++) {
-		for (uint j = 0 ; j<CHARLINELEN ; j++) {
-			*(ch + i*CHARLEN + j ) = (*(from+ i) & (1<<j))!=0;
-			//fprintf(jar.log, "%d:%d -> %d\n", (1<<j), *(from+ i), *(ch + i));
-		}
-	}
-	return ch;
-}
-
-bool* ExpandMappedChar(uint8* from, int index) {
-	return ExpandChar((from+CHARLEN*index));
-}
-
 void DrawChar(struct fbjar jar, uint8* chr, int y, int x) {
 	uint8* location = GetFbPos(jar, y, x);
 	for (int i = 0 ; i<CHARLEN; i++) {
