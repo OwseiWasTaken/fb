@@ -1,24 +1,24 @@
+// fb
 #include <sys/types.h>
 #include <sys/ioctl.h>
 #include <sys/mman.h>
 #include <linux/fb.h>
-
+// work
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
-#include <stdbool.h>
 #include <unistd.h>
 #include <signal.h>
 #include <math.h>
-
-#include <assert.h>
-#include <time.h>
-#include <fcntl.h>
 #include <termios.h>
-
+#include <time.h>
+// code
+#include <stdbool.h>
+#include <assert.h>
+#include <fcntl.h>
 // include initers / funcs
 #include "vars.c"
-
+// include drawers
 #include "draw/simple.c"
 #include "draw/normal.c"
 #include "draw/complex.c"
@@ -26,7 +26,6 @@
 
 int main ( void ) {
 	HideCursor();
-	ShowCursor();
 	struct fbjar jar = InitFb();
 	fprintf(jar.log, "fb size: line cols:%d, rows: %d\n", jar.cols-1, jar.rows-1);
 	fprintf(jar.log, "tty: %s\n", jar.tty);
@@ -43,7 +42,9 @@ int main ( void ) {
 	color ColSec = RGB(255,0,0);
 	color ColMin = RGB(255,0,255);
 	color ColHr = RGB(0,0,0);
-	int MaxR = 200;
+
+	// max pointer len
+	int MaxR = 250;
 	int pt = 350;
 	point top = MakePoint(pt-MaxR,pt-MaxR);
 	point mid = MakePoint(pt,pt);
@@ -53,21 +54,24 @@ int main ( void ) {
 	polar PolSec;
 	polar PolMin;
 	polar PolHr;
+
 	/* set pointers */{
 		PolSec = MakePolar(MaxR/10*8, 6*now.seccond);
-		PolMin = MakePolar(MaxR/10*6, 6*now.minute+PolSec.a/60);
-		PolHr =  MakePolar(MaxR/10*4, 30*now.hour+PolMin.a/60);
+		PolMin = MakePolar(MaxR/10*6, 6*now.minute+(PolSec.a/60));
+		PolHr =  MakePolar(MaxR/10*4, 30*now.hour+(PolMin.a/12));
+		// rotate
 		PolSec.a-=90;
 		PolMin.a-=90;
 		PolHr.a-=90;
 	}
 
 	while (true){
+		//TODO: write this with fb chars
 		/* write time */{
-			move(7,38);
-			printf("%30s", " ");
-			move(7,38);
-			printf("%d:%d:%2d", now.hour, now.minute, now.seccond);
+			move(top.y/16-1,mid.x/8-4);
+			printf("%8s", " ");
+			move(top.y/16-1,mid.x/8-4);
+			printf("%02d:%02d:%02d", now.hour, now.minute, now.seccond);
 			fflush(stdout);
 		}
 
@@ -94,10 +98,22 @@ int main ( void ) {
 		if (now.seccond == 60) {
 			time(&rn);
 			now = FmtTime(rn);
+			//now.seccond = 0;
+			//now.minute++;
+			//if (now.minute == 60) {
+			//	now.minute = 0;
+			//	now.hour++;
+			//	if (now.hour == 25) {
+			//		now.hour = 1;
+			//	}
+			//}
+
 			/* reset pointers */{
+				// fix any long-term delay
 				PolSec = MakePolar(MaxR/10*8, 6*now.seccond);
-				PolMin = MakePolar(MaxR/10*6, 6*now.minute+PolSec.a/60);
-				PolHr =  MakePolar(MaxR/10*4, 30*now.hour+PolMin.a/60);
+				PolMin = MakePolar(MaxR/10*6, 6*now.minute+(PolSec.a/60));
+				PolHr =  MakePolar(MaxR/10*4, 30*now.hour+(PolMin.a/12));
+				// rotate
 				PolSec.a-=90;
 				PolMin.a-=90;
 				PolHr.a-=90;
