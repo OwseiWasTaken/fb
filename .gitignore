@@ -1,4 +1,7 @@
 *
 !*.c
+draw/*
+!draw/*.c
 apps/*
 !apps/*.c
+!draw/drawimage
