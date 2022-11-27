@@ -24,14 +24,24 @@
 #include "draw/complex.c"
 #include "draw/chars.c"
 
+struct fbjar GlobalJar;
+
+void HandleInt( int sig ) {
+	ShowCursor();
+	CloseFb(GlobalJar);
+	exit(0);
+}
+
 int main ( void ) {
+	signal(SIGINT, HandleInt);
+
 	HideCursor();
-	struct fbjar jar = InitFb();
+	GlobalJar = InitFb();
+	struct fbjar jar = GlobalJar;
 	fprintf(jar.log, "fb size: line cols:%d, rows: %d\n", jar.cols-1, jar.rows-1);
 	fprintf(jar.log, "tty: %s\n", jar.tty);
 	//uint8* chars = ReadChars(1);
-	fprintf(jar.log, "chars loaded from 'draw/font'\n");
-	fflush(jar.log);
+	//fprintf(jar.log, "chars loaded from 'draw/font'\n");
 
 	time_t rn;
 	time(&rn);
