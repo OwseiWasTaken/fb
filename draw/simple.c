@@ -63,7 +63,7 @@ void SDrawPartCollum (
 
 void SDrawSquare (
 	struct fbjar jar,
-	struct Point top, struct Point bot
+	point top, point bot
 ) {
 	SDrawPartLine  (jar, top.y, top.x, bot.x);
 	SDrawPartLine  (jar, bot.y, top.x, bot.x);
@@ -73,7 +73,7 @@ void SDrawSquare (
 
 void SFillSquare (
 	struct fbjar jar,
-	struct Point top, struct Point bot
+	point top, point bot
 ) {
 	assert(CheckPIJ(jar, top));
 	assert(CheckPIJ(jar, bot));
@@ -85,6 +85,68 @@ void SFillSquare (
 			*(location + 0 + j + i) = 255;
 			*(location + 1 + j + i) = 255;
 			*(location + 2 + j + i) = 255;
+		}
+	}
+}
+
+void SDrawPolarLine(
+	struct fbjar jar,
+	point top, polar bot
+) {
+	polar now;
+	now.a = bot.a;
+	for ( now.r = 0; now.r<bot.r; now.r++) {
+		point dif = SPolarToCoord(now);
+		uint8* location = GetFbPos(jar, dif.y+top.y, dif.x+top.x);
+		*(location+0) = 255;
+		*(location+1) = 255;
+		*(location+2) = 255;
+	}
+}
+
+void SDrawCircle (
+	 struct fbjar jar,
+	 point top, int r
+) {
+	point bot = MakePoint(top.y+r+r, top.x+r+r);
+	assert(CheckPIJ(jar, bot));
+	assert(CheckPIJ(jar, top));
+
+	uint8* location = GetFbPos(jar, top.y, top.x);
+	int sr = -(r*r);
+
+	for (int y = -r ; y<bot.y ; y++) {
+		for (int x = -r ; x<bot.x ; x++) {
+			if (
+					isqrt(x)+isqrt(y)+sr>=-r &&
+					isqrt(x)+isqrt(y)+sr<=r
+				) {
+				*(location + 0 + (x+r)*jar.bpp + (y+r)*jar.skip) = 255;
+				*(location + 1 + (x+r)*jar.bpp + (y+r)*jar.skip) = 255;
+				*(location + 2 + (x+r)*jar.bpp + (y+r)*jar.skip) = 255;
+			}
+		}
+	}
+}
+
+void SFillCircle (
+	 struct fbjar jar,
+	 point top, int r
+) {
+	point bot = MakePoint(top.y+r+r, top.x+r+r);
+	assert(CheckPIJ(jar, bot));
+	assert(CheckPIJ(jar, top));
+
+	uint8* location = GetFbPos(jar, top.y, top.x);
+	int sr = -(r*r);
+
+	for (int y = -r ; y<bot.y ; y++) {
+		for (int x = -r ; x<bot.x ; x++) {
+			if ( isqrt(x)+isqrt(y)+sr<=0) {
+				*(location + 0 + (x+r)*jar.bpp + (y+r)*jar.skip) = 255;
+				*(location + 1 + (x+r)*jar.bpp + (y+r)*jar.skip) = 255;
+				*(location + 2 + (x+r)*jar.bpp + (y+r)*jar.skip) = 255;
+			}
 		}
 	}
 }
