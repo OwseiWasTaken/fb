@@ -1,3 +1,6 @@
+// globa jar
+struct fbjar GlobalJar;
+
 // simple defs
 typedef unsigned int uint;
 typedef unsigned char uint8;
@@ -98,6 +101,10 @@ struct fbjar InitFb()
 		.log = fopen("log.txt", "w"),
 		.tty = ttyname(STDIN_FILENO)
 	};
+	fprintf(jar.log, "fb size: line cols:%d, rows: %d\n", jar.cols-1, jar.rows-1);
+	fprintf(jar.log, "tty: %s\n", jar.tty);
+	// GlobalJar for Sig handleing etc
+	GlobalJar = jar;
 	return jar;
 }
 
@@ -263,4 +270,10 @@ char* FmtTimeToString(fmttime now) {
 	sprintf(buff, "s:%d\nm:%d\nh:%d\nd:%d\ny:%d\n\nM:%s\nW:%s",
 		now.seccond, now.minute, now.hour, now.day, now.year, now.month, now.weekday);
 	return buff;
+}
+
+void SHandleInt( int sig ) {
+	ShowCursor();
+	CloseFb(GlobalJar);
+	exit(0);
 }
