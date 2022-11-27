@@ -3,6 +3,10 @@ typedef unsigned int uint;
 typedef unsigned char uint8;
 typedef char int8;
 
+#define PI 3.141592
+//TODO: dynamic
+#define UTFDIFF -3
+
 // complex defs
 struct fbjar {
 	uint8* fbmem;
@@ -16,16 +20,29 @@ struct fbjar {
 	char* tty;
 };
 
-struct Color {
+typedef struct {
 	uint8 R, G, B;
-};
+} color;
 
-struct Point {
+typedef struct {
 	int y, x;
-};
+} point;
 
-typedef struct Color color;
-typedef struct Point point;
+typedef struct {
+	float y, x;
+} ppoint;
+
+typedef struct {
+	float a;
+	float r;
+} polar;
+
+typedef struct {
+	int year, day, hour, minute, seccond;
+	char weekday[4];
+	char month[4];
+} fmttime;
+
 
 //funcs
 
@@ -137,6 +154,11 @@ point MakePoint(int y, int x) {
 	return p;
 }
 
+polar MakePolar(float r, float a) {
+	polar p = {.r = r, .a = a};
+	return p;
+}
+
 color RGB(uint8 R, uint8 G, uint8 B) {
 	color c = {.R = R, .G = G, .B = B};
 	return c;
@@ -155,6 +177,10 @@ inline long int GetPixelPos ( struct fbjar jar, int y, int x ) {
 
 inline uint8* GetFbPos ( struct fbjar jar, int y, int x ) {
 	return jar.fbmem+((y+jar.yoff)*jar.skip + (jar.xoff+x)*jar.bpp);
+}
+
+inline uint8* GetFbPnt ( struct fbjar jar, point p ) {
+	return jar.fbmem+((p.y+jar.yoff)*jar.skip + (jar.xoff+p.x)*jar.bpp);
 }
 
 bool CheckPIJ (struct fbjar jar, point p) {
@@ -179,3 +205,62 @@ bool CheckInjar (struct fbjar jar, int y, int x) {
 	return true;
 }
 
+int ipow(int base, int power) {
+	return (int)pow((double)base, (double)power);
+}
+
+int isquare (int base) {
+	return ipow(base, 2);
+}
+
+ppoint PolarToCoord (polar plr) {
+	ppoint pnt;
+	float a = plr.a*(PI/180);
+	pnt.x = plr.r*cos(a);
+	pnt.y = plr.r*sin(a);
+	return pnt;
+}
+
+point SPolarToCoord (polar plr) {
+	point pnt;
+	float a = plr.a*(PI/180);
+	pnt.x = plr.r*cos(a);
+	pnt.y = plr.r*sin(a);
+	return pnt;
+}
+
+fmttime FmtTime(time_t rn) {
+	fmttime now;
+
+	char* timetext = ctime(&rn);
+	now.weekday[0] = timetext[0];
+	now.weekday[1] = timetext[1];
+	now.weekday[2] = timetext[2];
+	now.weekday[4] = '\0';
+
+	now.month[0] = timetext[4];
+	now.month[1] = timetext[5];
+	now.month[2] = timetext[6];
+	now.month[3] = '\0';
+
+	now.minute = (rn%(60*60))/60;
+	now.seccond= rn%60;
+	now.year = 1970+(int)(rn/(24.0*3600.0)/365.25);
+	now.hour = rn/3600%24+(UTFDIFF);
+	if (now.hour < 1) {
+		now.hour = 24+now.hour;
+	}
+
+	now.day = timetext[9]-'0';
+	if (timetext[8] != ' ') {
+		now.day += 10*(timetext[8]-'0');
+	};
+	return now;
+}
+
+char* FmtTimeToString(fmttime now) {
+	char* buff = malloc(38);
+	sprintf(buff, "s:%d\nm:%d\nh:%d\nd:%d\ny:%d\n\nM:%s\nW:%s",
+		now.seccond, now.minute, now.hour, now.day, now.year, now.month, now.weekday);
+	return buff;
+}
