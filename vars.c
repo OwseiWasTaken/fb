@@ -49,14 +49,19 @@ struct fbjar InitFb()
 		.screensize = screensize,
 		.rows = (screensize/finfo.line_length)-1,
 		.cols = (finfo.line_length/(vinfo.bits_per_pixel/8))-10,
-		.log = fopen("log.txt", "w"),
-		.tty = ttyname(STDIN_FILENO)
+		.tty = ttyname(STDIN_FILENO),
+		.log = fopen("/tmp/buffy.log", "w")
 	};
-	fprintf(jar.log, "fb size: line cols:%d, rows: %d\n", jar.cols-1, jar.rows-1);
-	fprintf(jar.log, "tty: %s\n", jar.tty);
 	// GlobalJar for Sig handleing etc
 	GlobalJar = jar;
 	return jar;
+}
+
+void CloseFb(struct fbjar jar) {
+	munmap(jar.fbmem, jar.screensize);
+	fflush(jar.log);
+	fclose(jar.log);
+	close(jar.fd);
 }
 
 void InitTerm ( struct fbjar jar ) {
@@ -66,25 +71,18 @@ void InitTerm ( struct fbjar jar ) {
 	char reconfig[36+10]; /* 36 = comamnd len, 10 = /dev/ttyNN */
 
 	fprintf(jar.log, "this tty: %s\n", jar.tty);
-	system("/bin/stty -g > restore");
-	fprintf(jar.log, "tty config saved to 'restore'\n");
+	system("/bin/stty -g > /tmp/restore");
+	fprintf(jar.log, "tty config saved to '/tmp/restore'\n");
 
 	sprintf(reconfig, "/bin/stty -F %s -echo cbreak min 1", jar.tty);
 	system(reconfig);
 }
 
 void CloseTerm (struct fbjar jar) {
-	system("/bin/stty $(/bin/cat restore)");
+	system("/bin/stty $(/bin/cat /tmp/restore)");
 	fprintf(jar.log, "\ntty config restored\n");
-	system("/bin/rm restore");
-	fprintf(jar.log, "file 'restore' deleted\n");
-}
-
-void CloseFb(struct fbjar jar) {
-	munmap(jar.fbmem, jar.screensize);
-	fflush(jar.log);
-	fclose(jar.log);
-	close(jar.fd);
+	system("/bin/rm /tmp/restore");
+	fprintf(jar.log, "file '/tmp/restore' deleted\n");
 }
 
 void move(int y, int x) {
@@ -230,7 +228,9 @@ void SHandleInt( int sig ) {
 }
 
 struct fbjar InitBuffy() {
-	signal(SIGINT, SHandleInt);
+	struct sigaction act;
+	act.sa_handler = SHandleInt;
+	sigaction(SIGINT, &act, NULL);
 	struct fbjar jar = InitFb();
 	fprintf(jar.log, "fb size: line cols:%d, rows: %d\n", jar.cols-1, jar.rows-1);
 	fprintf(jar.log, "tty: %s\n", jar.tty);
