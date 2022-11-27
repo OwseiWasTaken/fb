@@ -1,52 +1,3 @@
-// globa jar
-struct fbjar GlobalJar;
-
-// simple defs
-typedef unsigned int uint;
-typedef unsigned char uint8;
-typedef char int8;
-
-#define PI 3.141592
-//TODO: dynamic
-#define UTFDIFF -3
-
-// complex defs
-struct fbjar {
-	uint8* fbmem;
-	int bpp; // bytes per pixel
-	int xoff, yoff;
-	int skip; // skip from y to y+1 (in bytes)
-	int rows, cols;
-	long int screensize;
-	int fd;
-	FILE* log;
-	char* tty;
-};
-
-typedef struct {
-	uint8 R, G, B;
-} color;
-
-typedef struct {
-	int y, x;
-} point;
-
-typedef struct {
-	float y, x;
-} ppoint;
-
-typedef struct {
-	float a;
-	float r;
-} polar;
-
-typedef struct {
-	int year, day, hour, minute, seccond;
-	char weekday[4];
-	char month[4];
-} fmttime;
-
-
 //funcs
 
 //TODO: can't write to the end of the screen
@@ -178,16 +129,16 @@ color RGB(uint8 R, uint8 G, uint8 B) {
 //	return ret;
 //}
 
-inline long int GetPixelPos ( struct fbjar jar, int y, int x ) {
+long int GetPixelPos ( struct fbjar jar, int y, int x ) {
 	return (y+jar.yoff)*jar.skip + (jar.xoff+x)*jar.bpp;
 }
 
-inline uint8* GetFbPos ( struct fbjar jar, int y, int x ) {
-	return jar.fbmem+((y+jar.yoff)*jar.skip + (jar.xoff+x)*jar.bpp);
+uint8* GetFbPnt ( struct fbjar jar, point p ) {
+	return jar.fbmem+((p.y+jar.yoff)*jar.skip + (jar.xoff+p.x)*jar.bpp);
 }
 
-inline uint8* GetFbPnt ( struct fbjar jar, point p ) {
-	return jar.fbmem+((p.y+jar.yoff)*jar.skip + (jar.xoff+p.x)*jar.bpp);
+uint8* GetFbPos ( struct fbjar jar, int y, int x ) {
+	return jar.fbmem+((y+jar.yoff)*jar.skip + (jar.xoff+x)*jar.bpp);
 }
 
 bool CheckPIJ (struct fbjar jar, point p) {
@@ -277,3 +228,14 @@ void SHandleInt( int sig ) {
 	CloseFb(GlobalJar);
 	exit(0);
 }
+
+struct fbjar InitBuffy() {
+	signal(SIGINT, SHandleInt);
+	struct fbjar jar = InitFb();
+	fprintf(jar.log, "fb size: line cols:%d, rows: %d\n", jar.cols-1, jar.rows-1);
+	fprintf(jar.log, "tty: %s\n", jar.tty);
+	//uint8* chars = ReadChars(1);
+	//fprintf(jar.log, "chars loaded from 'draw/font'\n");
+	return jar;
+}
+
