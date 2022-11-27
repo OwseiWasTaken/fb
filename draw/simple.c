@@ -118,8 +118,8 @@ void SDrawCircle (
 	for (int y = -r ; y<bot.y ; y++) {
 		for (int x = -r ; x<bot.x ; x++) {
 			if (
-					isqrt(x)+isqrt(y)+sr>=-r &&
-					isqrt(x)+isqrt(y)+sr<=r
+					isquare(x)+isquare(y)+sr>=-r &&
+					isquare(x)+isquare(y)+sr<=r
 				) {
 				*(location + 0 + (x+r)*jar.bpp + (y+r)*jar.skip) = 255;
 				*(location + 1 + (x+r)*jar.bpp + (y+r)*jar.skip) = 255;
@@ -142,7 +142,7 @@ void SFillCircle (
 
 	for (int y = -r ; y<bot.y ; y++) {
 		for (int x = -r ; x<bot.x ; x++) {
-			if ( isqrt(x)+isqrt(y)+sr<=0) {
+			if ( isquare(x)+isquare(y)+sr<=0) {
 				*(location + 0 + (x+r)*jar.bpp + (y+r)*jar.skip) = 255;
 				*(location + 1 + (x+r)*jar.bpp + (y+r)*jar.skip) = 255;
 				*(location + 2 + (x+r)*jar.bpp + (y+r)*jar.skip) = 255;
