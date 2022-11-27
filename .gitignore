@@ -1,4 +1,4 @@
-config.vim
-run.sh
-fb
-*.txt
+*
+!*.c
+apps/*
+!apps/*.c
