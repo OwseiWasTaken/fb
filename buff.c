@@ -24,24 +24,58 @@
 #include "draw/complex.c"
 #include "draw/chars.c"
 
-struct fbjar GlobalJar;
 
-void HandleInt( int sig ) {
-	ShowCursor();
-	CloseFb(GlobalJar);
-	exit(0);
-}
-
-int main ( void ) {
-	signal(SIGINT, HandleInt);
-
-	HideCursor();
-	GlobalJar = InitFb();
-	struct fbjar jar = GlobalJar;
+int main ( int argc, char** argv ) {
+	// init
+	signal(SIGINT, SHandleInt);
+	struct fbjar jar = InitFb();
 	fprintf(jar.log, "fb size: line cols:%d, rows: %d\n", jar.cols-1, jar.rows-1);
 	fprintf(jar.log, "tty: %s\n", jar.tty);
 	//uint8* chars = ReadChars(1);
 	//fprintf(jar.log, "chars loaded from 'draw/font'\n");
+
+	bool debug = false;
+	bool digital = false;
+	int MaxR = 250;
+	int y = jar.rows/2-MaxR;
+	int x = jar.cols/2-MaxR;
+	/* parse args */{
+		for (int i = 0 ; i<argc ; i++) {
+			if (argv[i][0] == '-') {
+				if (!strcmp(argv[i], "--debug")) {
+					debug = true;
+				} else if (!strcmp(argv[i], "--digital")) {
+					digital = true;
+				} else if (!strcmp(argv[i], "-d")) {
+					digital = true;
+				} else if (!strcmp(argv[i], "-r")) {
+					i++;
+					assert(i < argc); // read radius size
+					MaxR = atoi(argv[i]);
+					if (MaxR == 0 && !(argv[i][0] == '0')) {
+						assert(0);//can't parse -r input
+					}
+				} else if (!strcmp(argv[i], "-y")) {
+					i++;
+					assert(i < argc); // read radius size
+					y = atoi(argv[i]);
+					if (y == 0 && !(argv[i][0] == '0')) {
+						assert(0);//can't parse -r input
+					}
+				} else if (!strcmp(argv[i], "-x")) {
+					i++;
+					assert(i < argc); // read radius size
+					x = atoi(argv[i]);
+					if (x == 0 && !(argv[i][0] == '0')) {
+						assert(0);//can't parse -r input
+					}
+				}
+			}
+		}
+	}
+	HideCursor();
+	x+=MaxR;
+	y+=MaxR;
 
 	time_t rn;
 	time(&rn);
@@ -54,30 +88,27 @@ int main ( void ) {
 	color ColHr = RGB(0,0,0);
 
 	// max pointer len
-	int MaxR = 250;
-	int pt = 350;
-	point top = MakePoint(pt-MaxR,pt-MaxR);
-	point mid = MakePoint(pt,pt);
+	point top = MakePoint(y-MaxR,x-MaxR);
+	point mid = MakePoint(y,x);
 
 	SFillCircle(jar, top, MaxR);
 
-	polar PolSec;
-	polar PolMin;
-	polar PolHr;
+	polar PolSec, PolMin, PolHr;
 
-	/* set pointers */{
+	/* set pointers */ {
 		PolSec = MakePolar(MaxR/10*8, 6*now.seccond);
-		PolMin = MakePolar(MaxR/10*6, 6*now.minute+(PolSec.a/60));
-		PolHr =  MakePolar(MaxR/10*4, 30*now.hour+(PolMin.a/12));
+		PolMin = MakePolar(MaxR/10*6, 6*now.minute+(now.seccond/10));
+		PolHr =  MakePolar(MaxR/10*4, 30*now.hour+(now.minute/2));
 		// rotate
 		PolSec.a-=90;
 		PolMin.a-=90;
 		PolHr.a-=90;
 	}
 
-	while (true){
+	while (1){
 		//TODO: write this with fb chars
-		/* write time */{
+		SFillCircle(jar, top, MaxR);
+		if (digital) /* write time */{
 			move(top.y/16-1,mid.x/8-4);
 			printf("%8s", " ");
 			move(top.y/16-1,mid.x/8-4);
@@ -85,18 +116,17 @@ int main ( void ) {
 			fflush(stdout);
 		}
 
-
 		/* draw the pointers */ {
 			TDrawPolarLine(jar, mid, PolSec, ColSec, 2);
-			TDrawPolarLine(jar, mid, PolMin, ColMin, 2);
-			TDrawPolarLine(jar, mid, PolHr , ColHr , 2);
+			TDrawPolarLine(jar, mid, PolMin, ColMin, 3);
+			TDrawPolarLine(jar, mid, PolHr , ColHr , 4);
 
 			now.seccond++;
 			sleep(1);
 
 			TDrawPolarLine(jar, mid, PolSec, white, 2);
-			TDrawPolarLine(jar, mid, PolMin, white, 2);
-			TDrawPolarLine(jar, mid, PolHr , white, 2);
+			TDrawPolarLine(jar, mid, PolMin, white, 3);
+			TDrawPolarLine(jar, mid, PolHr , white, 4);
 		}
 
 		/* move the pointers */ {
@@ -106,30 +136,32 @@ int main ( void ) {
 		}
 
 		if (now.seccond == 60) {
-			time(&rn);
-			now = FmtTime(rn);
-			//now.seccond = 0;
-			//now.minute++;
-			//if (now.minute == 60) {
-			//	now.minute = 0;
-			//	now.hour++;
-			//	if (now.hour == 25) {
-			//		now.hour = 1;
-			//	}
-			//}
+			if (debug) {
+				now.seccond = 0;
+				now.minute++;
+				if (now.minute == 60) {
+					now.minute = 0;
+					now.hour++;
+					if (now.hour == 25) {
+						now.hour = 1;
+					}
+				}
+			} else {
+				time(&rn);
+				now = FmtTime(rn);
+			}
 
 			/* reset pointers */{
 				// fix any long-term delay
 				PolSec = MakePolar(MaxR/10*8, 6*now.seccond);
-				PolMin = MakePolar(MaxR/10*6, 6*now.minute+(PolSec.a/60));
-				PolHr =  MakePolar(MaxR/10*4, 30*now.hour+(PolMin.a/12));
+				PolMin = MakePolar(MaxR/10*6, 6*now.minute+(now.seccond/10));
+				PolHr =  MakePolar(MaxR/10*4, 30*now.hour+(now.minute/2));
 				// rotate
 				PolSec.a-=90;
 				PolMin.a-=90;
 				PolHr.a-=90;
 			}
 		}
-
 	}
 
 
