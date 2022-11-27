@@ -24,15 +24,18 @@
 #include "draw/complex.c"
 #include "draw/chars.c"
 
-
-int main ( int argc, char** argv ) {
-	// init
+struct fbjar InitBuffy() {
 	signal(SIGINT, SHandleInt);
 	struct fbjar jar = InitFb();
 	fprintf(jar.log, "fb size: line cols:%d, rows: %d\n", jar.cols-1, jar.rows-1);
 	fprintf(jar.log, "tty: %s\n", jar.tty);
 	//uint8* chars = ReadChars(1);
 	//fprintf(jar.log, "chars loaded from 'draw/font'\n");
+	return jar;
+}
+
+int main ( int argc, char** argv ) {
+	struct fbjar jar = InitBuffy();
 
 	bool debug = false;
 	bool digital = false;
@@ -59,14 +62,18 @@ int main ( int argc, char** argv ) {
 					i++;
 					assert(i < argc); // read radius size
 					y = atoi(argv[i]);
-					if (y == 0 && !(argv[i][0] == '0')) {
+					if (y == 0 && (argv[i][0] == 'm')) {
+						y = jar.rows-2*MaxR-1;
+					} else if (y == 0 && !(argv[i][0] == '0')) {
 						assert(0);//can't parse -r input
 					}
 				} else if (!strcmp(argv[i], "-x")) {
 					i++;
 					assert(i < argc); // read radius size
 					x = atoi(argv[i]);
-					if (x == 0 && !(argv[i][0] == '0')) {
+					if (x == 0 && (argv[i][0] == 'm')) {
+						x = jar.cols-2*MaxR-1;
+					} else if (x == 0 && !(argv[i][0] == '0')) {
 						assert(0);//can't parse -r input
 					}
 				}
