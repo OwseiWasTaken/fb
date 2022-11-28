@@ -81,3 +81,6 @@ struct fbjar GlobalJar;
 #include "draw/chars.c"
 
 #endif
+
+//TODO: use memset for clearing and fillrect
+
