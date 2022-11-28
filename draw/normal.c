@@ -87,9 +87,9 @@ void DrawPolarLine(
 }
 
 void DrawCircle (
-	 struct fbjar jar,
-	 point top, int r,
-	 color RGB
+	struct fbjar jar,
+	point top, int r,
+	color RGB
 ) {
 	point bot = MakePoint(top.y+r+r, top.x+r+r);
 	assert(CheckPIJ(jar, bot));
@@ -113,9 +113,9 @@ void DrawCircle (
 }
 
 void FillCircle (
-	 struct fbjar jar,
-	 point top, int r,
-	 color RGB
+	struct fbjar jar,
+	point top, int r,
+	color RGB
 ) {
 	point bot = MakePoint(top.y+r+r, top.x+r+r);
 	assert(CheckPIJ(jar, bot));

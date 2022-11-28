@@ -5,21 +5,22 @@
 
 #include "font.c"
 
-//// read chars from draw/font
-//uint8* ReadChars (int len) {
-//	int fontfd = open("./draw/font", O_RDWR);
-//	uint8 *chars = malloc(CHARLEN*len);
-//	chars = (uint8 *)mmap(0,
-//			CHARLEN*len, PROT_READ, MAP_SHARED, fontfd, 0);
-//	return chars;
-//}
-//
-////for (int i = 0 ; i<CHARLEN; i++) {
-//	//for (int j = 0 ; j<8 ; j++) {
-//	//	fprintf(jar.log, "%s", *(ch+i*CHARLEN+j)?"@":".");
-//	//}
-////}
+// read chars from draw/font
+uint8* ReadChars (int len) {
+	int fontfd = open("./draw/font", O_RDWR);
+	uint8 *chars = malloc(CHARLEN*len);
+	chars = (uint8 *)mmap(0,
+			CHARLEN*len, PROT_READ, MAP_SHARED, fontfd, 0);
+	return chars;
+}
 
+//for (int i = 0 ; i<CHARLEN; i++) {
+	//for (int j = 0 ; j<8 ; j++) {
+	//	fprintf(jar.log, "%s", *(ch+i*CHARLEN+j)?"@":".");
+	//}
+//}
+
+//TODO: draw bitmap
 void DrawChar(struct fbjar jar, int y, int x) {
 	uint8* location = GetFbPos(jar, y, x);
 	for (int i = 0 ; i<CHARLEN; i++) {
