@@ -39,14 +39,17 @@ def main() -> int:
 		return 0
 
 	image = "./draw/fontimage"
-	editor = getenv("EDITOR")
-	if not editor:
-		print("$EDITOR isn't defined\n")
-		return 1
+	if get().first:
+		image = get().first
+	if not (get("--pack").exists or get("--packc").exists):
+		editor = getenv("EDITOR")
+		if not editor:
+			print("$EDITOR isn't defined\n")
+			return 1
 
-	if (x:=cmd(f"{editor} {image}")).returncode:
-		print("editor broke\n")
-		return x.returncode
+		if (x:=cmd(f"{editor} {image}")):
+			print("editor broke\n")
+			return x
 
 	with open(image) as f:
 		file = ''.join(f.readlines()).replace("\n", "")
@@ -54,10 +57,12 @@ def main() -> int:
 
 	if canpack(file):
 		packed = pack(file)
-		print(unpackfile(packed))
 		print(packed)
+		with open(image+".bitmap", 'wb') as f:
+			f.write(bytes(packed))
+			print(bytes(packed))
 	else:
-		print("can't pack /tmp/tofont's content")
+		print("can't pack content")
 		return 2
 
 	return 0
