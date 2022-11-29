@@ -1,4 +1,6 @@
 #include "./buffy.h"
+//TODO: dynamic
+#define UTFDIFF -3
 
 int main ( int argc, char** argv ) {
 	struct fbjar jar = InitBuffy();
