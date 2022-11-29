@@ -29,6 +29,11 @@ typedef unsigned char uint8;
 typedef char int8;
 
 #define PI 3.141592
+// written char heigth in pixels
+#define CHARLEN 16
+// written char width in pixels
+#define CHARLINELEN 8
+
 
 // complex defs
 struct fbjar {
@@ -65,6 +70,26 @@ typedef struct {
 	char weekday[4];
 	char month[4];
 } fmttime;
+
+// one byte for 8 pixels
+// one bit for each
+// only control is on/off
+typedef struct {
+	uint8* cont;
+	int heigth, width;
+} bitmap;
+
+// one byte for pixel
+// but i'm thinking of
+//  only using 4 or
+//  2 bits for each pixel
+//  and give up some intensity control
+// full control intensity, for now
+typedef struct {
+	uint8* cont;
+	int heigth, width;
+} bytemap;
+
 
 // global jar
 struct fbjar GlobalJar;
