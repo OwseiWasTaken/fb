@@ -196,7 +196,7 @@ point SPolarToCoord (polar plr) {
 	return pnt;
 }
 
-fmttime FmtTime(time_t rn) {
+fmttime FmtTime(time_t rn, int UTF) {
 	fmttime now;
 
 	char* timetext = ctime(&rn);
@@ -213,7 +213,7 @@ fmttime FmtTime(time_t rn) {
 	now.minute = (rn%(60*60))/60;
 	now.seccond= rn%60;
 	now.year = 1970+(int)(rn/(24.0*3600.0)/365.25);
-	now.hour = rn/3600%24+(UTFDIFF);
+	now.hour = rn/3600%24+(UTF);
 	if (now.hour < 1) {
 		now.hour = 24+now.hour;
 	}

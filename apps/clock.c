@@ -55,7 +55,7 @@ int main ( int argc, char** argv ) {
 	time_t rn;
 	time(&rn);
 
-	fmttime now = FmtTime(rn);
+	fmttime now = FmtTime(rn, UTFDIFF);
 
 	color white = RGB(255,255,255);
 	color ColSec = RGB(255,0,0);
