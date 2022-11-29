@@ -29,8 +29,6 @@ typedef unsigned char uint8;
 typedef char int8;
 
 #define PI 3.141592
-//TODO: dynamic
-#define UTFDIFF -3
 
 // complex defs
 struct fbjar {
