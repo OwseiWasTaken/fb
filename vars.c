@@ -115,6 +115,13 @@ polar MakePolar(float r, float a) {
 	return p;
 }
 
+// ANSII (text) rgb
+char* TRGB(uint8 R, uint8 G, uint8 B) {
+	char* buff = malloc(21);
+	sprintf(buff, "\x1b[38;2;%d;%d;%dm", R, G, B);
+	return buff;
+}
+
 color RGB(uint8 R, uint8 G, uint8 B) {
 	color c = {.R = R, .G = G, .B = B};
 	return c;
@@ -129,6 +136,10 @@ color RGB(uint8 R, uint8 G, uint8 B) {
 
 long int GetPixelPos ( struct fbjar jar, int y, int x ) {
 	return (y+jar.yoff)*jar.skip + (jar.xoff+x)*jar.bpp;
+}
+
+long int GetPixelPnt ( struct fbjar jar, point p ) {
+	return (p.y+jar.yoff)*jar.skip + (jar.xoff+p.x)*jar.bpp;
 }
 
 uint8* GetFbPnt ( struct fbjar jar, point p ) {
