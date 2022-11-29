@@ -8,7 +8,8 @@ def canpack(cont: str) -> bool:
 def pack(cont: str) -> list[int]:
 	bins = list(map(lambda x: "0" if x in " .·-" else "1", cont))
 	ints = []
-	for i in r(16):
+	print(len(bins))
+	for i in r(len(bins)//8):
 		ints.append(int( ''.join(bins[i*8:(i+1)*8]) , 2))
 	return ints
 
@@ -31,11 +32,22 @@ def main() -> int:
 		file = "draw/font"
 		if x:=get("--read").first:
 			file = x
+		elif x:=get().first:
+			file = x
 		with open(file, "rb") as f:
-			chars = unpackfile(f.readlines()[0])
-		for i in r(chars):
-			print(f"\b\nChar: {i}")
-			print(''.join(chars[i]))
+			chars = (f.readlines()[0])
+		if "font" in file:
+			chars = unpackfile(chars)
+			for i in r(chars):
+				print(f"\b\nChar: {i}")
+				print(''.join(chars[i]))
+		else:
+			if get("--export").exists:
+				print(",\n".join(map(str, chars)))
+			else:
+				for i in r(len(chars)):
+					print(f"{i}:{chars[i]}")
+
 		return 0
 
 	image = "./draw/fontimage"
@@ -47,9 +59,9 @@ def main() -> int:
 			print("$EDITOR isn't defined\n")
 			return 1
 
-		if (x:=cmd(f"{editor} {image}")):
+		if (x:=cmd(f"{editor} {image}")).returncode:
 			print("editor broke\n")
-			return x
+			return x.returncode
 
 	with open(image) as f:
 		file = ''.join(f.readlines()).replace("\n", "")
@@ -57,10 +69,10 @@ def main() -> int:
 
 	if canpack(file):
 		packed = pack(file)
-		print(packed)
 		with open(image+".bitmap", 'wb') as f:
 			f.write(bytes(packed))
-			print(bytes(packed))
+		for i in packed:
+			print(i)
 	else:
 		print("can't pack content")
 		return 2
