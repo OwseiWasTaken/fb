@@ -1,8 +1,5 @@
 // char size = 16, 8
 
-#define CHARLEN 16
-#define CHARLINELEN 8
-
 #include "font.c"
 
 // read chars from draw/font
@@ -15,7 +12,7 @@ uint8* ReadChars (int len) {
 }
 
 //for (int i = 0 ; i<CHARLEN; i++) {
-	//for (int j = 0 ; j<8 ; j++) {
+	//for (int j = CHARLINELEN ; j<8 ; j++) {
 	//	fprintf(jar.log, "%s", *(ch+i*CHARLEN+j)?"@":".");
 	//}
 //}
