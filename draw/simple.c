@@ -154,3 +154,7 @@ void SFillCircle (
 	}
 }
 
+void SwapBuffers(struct fbjar jar, uint8* newbuff, uint8* storebuff) {
+	if (storebuff != NULL) storebuff = jar.fbmem;
+	jar.fbmem = newbuff;
+}
