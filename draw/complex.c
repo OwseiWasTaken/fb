@@ -1,4 +1,5 @@
 
+
 void TDrawPartLine (
 	struct fbjar jar,
 	int y, int StartX, int EndX,
@@ -11,8 +12,8 @@ void TDrawPartLine (
 		skip = -skip;
 	}
 
-	assert(CheckInjar(jar, y, StartX));
-	assert(CheckInjar(jar, y+thick, EndX));
+	assert(CheckInJar(jar, y, StartX));
+	assert(CheckInJar(jar, y+thick, EndX));
 	assert(thick!=0);
 
 	uint8* location = GetFbPos(jar, y, StartX);
@@ -41,8 +42,8 @@ void TDrawPartCollum (
 		skip = -skip;
 	}
 
-	assert(CheckInjar(jar, StartY, x));
-	assert(CheckInjar(jar, EndY, x+thick));
+	assert(CheckInJar(jar, StartY, x));
+	assert(CheckInJar(jar, EndY, x+thick));
 	assert(thick!=0);
 
 	uint8* location = GetFbPos(jar, StartY, x);
