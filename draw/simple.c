@@ -183,13 +183,13 @@ void SwapBuffers(struct fbjar jar, uint8* newbuff, uint8* storebuff) {;
 void SDrawBitmap (struct fbjar jar, bitmap bmap, point top) {
 	uint8* location = GetFbPos(jar, top.y, top.x);
 	for (int i = 0 ; i<(bmap.heigth); i++) {
-		for (uint j = 0 ; j<(CHARLINELEN*bmap.width) ; j++) {
+		for (uint j = 0 ; j<(bmap.width) ; j++) {
 			location[0] = ((bmap.cont[i] & (1<<(8-j%8)))!=0)*255;
 			location[1] = ((bmap.cont[i] & (1<<(8-j%8)))!=0)*255;
 			location[2] = ((bmap.cont[i] & (1<<(8-j%8)))!=0)*255;
 			location += jar.bpp;
 		}
-		location -= jar.bpp*(CHARLINELEN*bmap.width);
+		location -= jar.bpp*(bmap.width);
 		location += jar.skip;
 	}
 }
@@ -197,7 +197,7 @@ void SDrawBitmap (struct fbjar jar, bitmap bmap, point top) {
 void SApplyBitmap (struct fbjar jar, bitmap bmap, point top) {
 	uint8* location = GetFbPos(jar, top.y, top.x);
 	for (int i = 0 ; i<(bmap.heigth); i++) {
-		for (uint j = 0 ; j<(CHARLINELEN*bmap.width) ; j++) {
+		for (uint j = 0 ; j<(bmap.width) ; j++) {
 			if ((bmap.cont[i] & (1<<(8-j%8)))!=0) {
 				location[0] = 255;
 				location[1] = 255;
@@ -205,7 +205,7 @@ void SApplyBitmap (struct fbjar jar, bitmap bmap, point top) {
 			}
 			location += jar.bpp;
 		}
-		location -= jar.bpp*(CHARLINELEN*bmap.width);
+		location -= jar.bpp*(bmap.width);
 		location += jar.skip;
 	}
 }
