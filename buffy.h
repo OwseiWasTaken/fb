@@ -90,6 +90,11 @@ typedef struct {
 	int heigth, width;
 } bytemap;
 
+// bpp = 3, RGB
+typedef struct {
+	color* cont;
+	int heigth, width;
+} bytesmap;
 
 // global jar
 struct fbjar GlobalJar;
@@ -98,6 +103,7 @@ struct fbjar GlobalJar;
 
 
 // include drawers
+// func naming [(S)imple][(T)hick,(K)eep,(R)elative](Draw,Apply,Fill)
 #include "draw/simple.c"
 #include "draw/normal.c"
 #include "draw/complex.c"
