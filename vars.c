@@ -116,6 +116,7 @@ polar MakePolar(float r, float a) {
 }
 
 // ANSII (text) rgb
+// only use while chars aren't implemented
 char* TRGB(uint8 R, uint8 G, uint8 B) {
 	char* buff = malloc(21);
 	sprintf(buff, "\x1b[38;2;%d;%d;%dm", R, G, B);
@@ -126,13 +127,6 @@ color RGB(uint8 R, uint8 G, uint8 B) {
 	color c = {.R = R, .G = G, .B = B};
 	return c;
 }
-
-//TODO: do this, but no segfault
-//char* TRGB(char r, char g, char b) {
-//	char* ret = "                  ";
-//	sprintf(ret, "\x1b[38;2;%c;%c;%cm", r, g, b);
-//	return ret;
-//}
 
 long int GetPixelPos ( struct fbjar jar, int y, int x ) {
 	return (y+jar.yoff)*jar.skip + (jar.xoff+x)*jar.bpp;
