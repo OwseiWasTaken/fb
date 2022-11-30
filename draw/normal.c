@@ -3,8 +3,8 @@ void DrawPartLine (
 	int y, int StartX, int EndX,
 	color RGB
 ) {
-	assert(CheckInjar(jar, y, StartX));
-	assert(CheckInjar(jar, y, EndX));
+	assert(CheckInJar(jar, y, StartX));
+	assert(CheckInJar(jar, y, EndX));
 
 	uint8* location = GetFbPos(jar, y, StartX);
 	int Xlen = (EndX - StartX)*jar.bpp;
@@ -22,8 +22,8 @@ void DrawPartCollum (
 	int x, int StartY, int EndY,
 	color RGB
 ) {
-	assert(CheckInjar(jar, StartY, x));
-	assert(CheckInjar(jar, EndY, x));
+	assert(CheckInJar(jar, StartY, x));
+	assert(CheckInJar(jar, EndY, x));
 
 	uint8* location = GetFbPos(jar, StartY, x);
 	int Ylen = (EndY - StartY);
@@ -51,14 +51,35 @@ void DrawRectangle(
 	DrawPartCollum(jar, bot.x, top.y, bot.y, RGB);
 }
 
+// R for relative
+void RFillRectangle (
+	struct fbjar jar,
+	point top, point bot,
+	color RGB
+) {
+	assert(CheckInJar(jar, bot.y+top.y, bot.x+top.x));
+	assert(CheckPIJ(jar, bot));
+	uint8* location = GetFbPos(jar, top.y, top.x);
+	int limy = bot.y*jar.skip;
+	int limx = bot.x*jar.bpp;
+
+	for (int i = 0; i < limy ; i+=jar.skip ) {
+		for (int j = 0; j < limx ; j+=jar.bpp ) {
+			*(location + 0 + j + i) = RGB.B;
+			*(location + 1 + j + i) = RGB.G;
+			*(location + 2 + j + i) = RGB.R;
+		}
+	}
+}
+
 void FillRectangle (
 	struct fbjar jar,
 	point top, point bot,
 	color RGB
 ) {
 	uint8* location = GetFbPos(jar, top.y, top.x);
-	int limy = bot.y*jar.skip;
-	int limx = bot.x*jar.bpp;
+	int limy = (top.y-bot.y)*jar.skip;
+	int limx = (top.x-bot.x)*jar.bpp;
 
 	for (int i = top.y; i < limy ; i+=jar.skip ) {
 		for (int j = top.x; j < limx ; j+=jar.bpp ) {
@@ -127,10 +148,79 @@ void FillCircle (
 	for (int y = -r ; y<bot.y ; y++) {
 		for (int x = -r ; x<bot.x ; x++) {
 			if ( isquare(x)+isquare(y)+sr<=0) {
-				*(location + 0 + (x+r)*jar.bpp + (y+r)*jar.skip) = RGB.G;
-				*(location + 1 + (x+r)*jar.bpp + (y+r)*jar.skip) = RGB.B;
-				*(location + 2 + (x+r)*jar.bpp + (y+r)*jar.skip) = RGB.R;
+				location[0+(x+r)*jar.bpp + (y+r)*jar.skip] = RGB.B;
+				location[1+(x+r)*jar.bpp + (y+r)*jar.skip] = RGB.G;
+				location[2+(x+r)*jar.bpp + (y+r)*jar.skip] = RGB.R;
 			}
 		}
 	}
+}
+
+void DrawBitmap (struct fbjar jar, bitmap bmap, point top, color RGB) {
+	assert(CheckPIJ(jar, top));
+	assert(CheckInJar(jar, top.y+bmap.heigth, top.x+bmap.width));
+	assert(bmap.cont!=NULL);
+	uint8* location = GetFbPos(jar, top.y, top.x);
+	int rollback = jar.bpp*(CHARLINELEN*bmap.width);
+	for (int i = 0 ; i<(bmap.heigth); i++) {
+		for (uint j = 0 ; j<(CHARLINELEN*bmap.width) ; j++) {
+			location[0] = ((bmap.cont[i] & (1<<(8-j%8)))!=0)*RGB.B;
+			location[1] = ((bmap.cont[i] & (1<<(8-j%8)))!=0)*RGB.G;
+			location[2] = ((bmap.cont[i] & (1<<(8-j%8)))!=0)*RGB.R;
+			location += jar.bpp;
+		}
+		location -= rollback;
+		location += jar.skip;
+	}
+}
+
+void ApplyBitmap (struct fbjar jar, bitmap bmap, point top, color RGB) {
+	assert(CheckPIJ(jar, top));
+	assert(CheckInJar(jar, top.y+bmap.heigth, top.x+bmap.width));
+	assert(bmap.cont);
+	uint8* location = GetFbPos(jar, top.y, top.x);
+	for (int i = 0 ; i<(bmap.heigth); i++) {
+		for (uint j = 0 ; j<(CHARLINELEN*bmap.width) ; j++) {
+			if ((bmap.cont[i] & (1<<(8-j%8)))!=0) {
+				location[0] = RGB.B;
+				location[1] = RGB.G;
+				location[2] = RGB.R;
+			}
+			location += jar.bpp;
+		}
+		location -= jar.bpp*(CHARLINELEN*bmap.width);
+		location += jar.skip;
+	}
+}
+
+bytesmap* SaveBytes ( struct fbjar jar, point top, point bot) {
+	assert(CheckPIJ(jar, top));
+	assert(CheckPIJ(jar, bot));
+
+	int size = (bot.y-top.y)+(bot.x-top.x);
+	int limy = bot.y-top.y;
+	int limx = bot.x-top.x;
+	//uint8* location = GetFbPnt(jar, top);
+
+	bytesmap map;
+	color* cols = malloc(size * sizeof(color));
+	for (int i = 0; i < limy; i++ ) {
+		for (int j = 0; j < limx; j++ ) {
+			cols[0+i*limx+j].B = location[0 + jar.skip*i + jar.bppj];
+			cols[1+i*limx+j].G = location[1 + jar.skip*i + jar.bppj];
+			cols[2+i*limx+j].R = location[2 + jar.skip*i + jar.bppj];
+		}
+	}
+	map.cont = cols;
+	map.heigth = limy;
+	map.width = limx;
+	return map;
+}
+
+void DrawBytes ( struct fbjar jar, point top, point bot, bytesmap map) {
+
+}
+
+void ApplyBytes ( struct fbjar jar, point top, point bot, bytesmap map) {
+
 }
