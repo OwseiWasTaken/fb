@@ -104,12 +104,15 @@ struct fbjar GlobalJar;
 
 // include drawers
 // func naming [(S)imple][(T)hick,(K)eep,(R)elative](Draw,Apply,Fill)
+// var naming
+// points
+// top = < bot
+// bot = > top
+// len = bot-top (for (R)elative funcs)
 #include "draw/simple.c"
 #include "draw/normal.c"
 #include "draw/complex.c"
 #include "draw/chars.c"
 
 #endif
-
-//TODO: use memset for clearing and fillrect
 
