@@ -15,7 +15,7 @@
 //TODO: DrawAllLine/Collum
 
 void SDrawAllLine (struct fbjar jar, int y) {
-	assert(CheckInjar(jar, y, 0));
+	assert(CheckInJar(jar, y, 0));
 
 	uint8* location = GetFbPos(jar, y, 0);
 	int x;
@@ -28,8 +28,8 @@ void SDrawAllLine (struct fbjar jar, int y) {
 }
 
 void SDrawPartLine (struct fbjar jar, int y, int StartX, int EndX) {
-	assert(CheckInjar(jar, y, StartX));
-	assert(CheckInjar(jar, y, EndX));
+	assert(CheckInJar(jar, y, StartX));
+	assert(CheckInJar(jar, y, EndX));
 
 	uint8* location = GetFbPos(jar, y, StartX);
 	int Xlen = (EndX - StartX)*jar.bpp;
@@ -46,8 +46,8 @@ void SDrawPartCollum (
 		struct fbjar jar,
 		int x, int StartY, int EndY
 ) {
-	assert(CheckInjar(jar, StartY, x));
-	assert(CheckInjar(jar, EndY, x));
+	assert(CheckInJar(jar, StartY, x));
+	assert(CheckInJar(jar, EndY, x));
 
 	uint8* location = GetFbPos(jar, StartY, x);
 	int Ylen = (EndY - StartY);
@@ -71,21 +71,42 @@ void SDrawSquare (
 	SDrawPartCollum(jar, bot.x, top.y, bot.y);
 }
 
-void SFillSquare (
+void SRFillRectangle (
+	struct fbjar jar,
+	point top, point bot
+) {
+	assert(CheckInJar(jar, bot.y+top.y, bot.x+top.x));
+	assert(CheckPIJ(jar, top));
+	uint8* location = GetFbPos(jar, top.y, top.x);
+	int limy = bot.y*jar.skip;
+	int limx = bot.x*jar.bpp;
+
+	for (int i = 0; i < limy ; i+=jar.skip ) {
+		memset(location, 255, jar.bpp*limx);
+		//for (int j = 0; j < limx ; j+=jar.bpp ) {
+		//	*(location + 0 + j + i) = 255;
+		//	*(location + 1 + j + i) = 255;
+		//	*(location + 2 + j + i) = 255;
+		//}
+	}
+}
+
+void SFillRectangle (
 	struct fbjar jar,
 	point top, point bot
 ) {
 	assert(CheckPIJ(jar, top));
 	assert(CheckPIJ(jar, bot));
 	uint8* location = GetFbPos(jar, top.y, top.x);
-	int limy = bot.y*jar.skip;
-	int limx = bot.x*jar.bpp;
+	int limy = (top.y-bot.y)*jar.skip;
+	int limx = (top.x-bot.x)*jar.bpp;
 	for (int i = 0; i < limy ; i+=jar.skip ) {
-		for (int j = 0; j < limx ; j+=jar.bpp ) {
-			*(location + 0 + j + i) = 255;
-			*(location + 1 + j + i) = 255;
-			*(location + 2 + j + i) = 255;
-		}
+		memset(location, 255, jar.bpp*limx);
+		//for (int j = 0; j < limx ; j+=jar.bpp ) {
+		//	*(location + 0 + j + i) = 255;
+		//	*(location + 1 + j + i) = 255;
+		//	*(location + 2 + j + i) = 255;
+		//}
 	}
 }
 
@@ -154,7 +175,38 @@ void SFillCircle (
 	}
 }
 
-void SwapBuffers(struct fbjar jar, uint8* newbuff, uint8* storebuff) {
+void SwapBuffers(struct fbjar jar, uint8* newbuff, uint8* storebuff) {;
 	if (storebuff != NULL) storebuff = jar.fbmem;
 	jar.fbmem = newbuff;
 }
+
+void SDrawBitmap (struct fbjar jar, bitmap bmap, point top) {
+	uint8* location = GetFbPos(jar, top.y, top.x);
+	for (int i = 0 ; i<(bmap.heigth); i++) {
+		for (uint j = 0 ; j<(CHARLINELEN*bmap.width) ; j++) {
+			location[0] = ((bmap.cont[i] & (1<<(8-j%8)))!=0)*255;
+			location[1] = ((bmap.cont[i] & (1<<(8-j%8)))!=0)*255;
+			location[2] = ((bmap.cont[i] & (1<<(8-j%8)))!=0)*255;
+			location += jar.bpp;
+		}
+		location -= jar.bpp*(CHARLINELEN*bmap.width);
+		location += jar.skip;
+	}
+}
+
+void SApplyBitmap (struct fbjar jar, bitmap bmap, point top) {
+	uint8* location = GetFbPos(jar, top.y, top.x);
+	for (int i = 0 ; i<(bmap.heigth); i++) {
+		for (uint j = 0 ; j<(CHARLINELEN*bmap.width) ; j++) {
+			if ((bmap.cont[i] & (1<<(8-j%8)))!=0) {
+				location[0] = 255;
+				location[1] = 255;
+				location[2] = 255;
+			}
+			location += jar.bpp;
+		}
+		location -= jar.bpp*(CHARLINELEN*bmap.width);
+		location += jar.skip;
+	}
+}
+
