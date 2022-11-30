@@ -161,7 +161,7 @@ bool CheckPIJ (struct fbjar jar, point p) {
 	return true;
 }
 
-bool CheckInjar (struct fbjar jar, int y, int x) {
+bool CheckInJar (struct fbjar jar, int y, int x) {
 	if (y >= jar.rows || y < 0 || x >= jar.cols || x < 0) {
 		fprintf( jar.log,
 			"y:%d max: %d, x:%d max: %d\n",
@@ -235,7 +235,7 @@ char* FmtTimeToString(fmttime now) {
 void SHandleInt( int sig ) {
 	ShowCursor();
 	CloseFb(GlobalJar);
-	exit(0);
+	exit(129);
 }
 
 struct fbjar InitBuffy() {
@@ -250,3 +250,11 @@ struct fbjar InitBuffy() {
 	return jar;
 }
 
+bool PInP(point top, point bot, point check) {
+	return (
+		top.y < check.y &&
+		bot.y > check.y &&
+		top.x < check.x &&
+		bot.x > check.x
+	);
+}
