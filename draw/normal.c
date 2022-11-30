@@ -193,22 +193,22 @@ void ApplyBitmap (struct fbjar jar, bitmap bmap, point top, color RGB) {
 	}
 }
 
-bytesmap* SaveBytes ( struct fbjar jar, point top, point bot) {
+bytesmap SaveBytes ( struct fbjar jar, point top, point bot) {
 	assert(CheckPIJ(jar, top));
 	assert(CheckPIJ(jar, bot));
 
 	int size = (bot.y-top.y)+(bot.x-top.x);
 	int limy = bot.y-top.y;
 	int limx = bot.x-top.x;
-	//uint8* location = GetFbPnt(jar, top);
+	uint8* location = GetFbPnt(jar, top);
 
 	bytesmap map;
 	color* cols = malloc(size * sizeof(color));
 	for (int i = 0; i < limy; i++ ) {
 		for (int j = 0; j < limx; j++ ) {
-			cols[0+i*limx+j].B = location[0 + jar.skip*i + jar.bppj];
-			cols[1+i*limx+j].G = location[1 + jar.skip*i + jar.bppj];
-			cols[2+i*limx+j].R = location[2 + jar.skip*i + jar.bppj];
+			cols[0+i*limx+j].B = location[0 + jar.skip*i + jar.bpp*j];
+			cols[1+i*limx+j].G = location[1 + jar.skip*i + jar.bpp*j];
+			cols[2+i*limx+j].R = location[2 + jar.skip*i + jar.bpp*j];
 		}
 	}
 	map.cont = cols;

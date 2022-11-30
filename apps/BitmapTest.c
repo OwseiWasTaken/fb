@@ -16,7 +16,8 @@ int main (void) {
 		1
 	};
 	b.cont = cont;
-	point at = MakePoint(100,100);
-	DrawBitmap(jar, b, at);
-	sleep(3);
+	point at = MakePoint(100,1000);
+	point end = MakePoint(at.y+b.heigth, at.x+8*b.width);
+	SDrawBitmap(jar, b, at);
+	back = KeepRectangle(jar, at, end);
 }
