@@ -161,12 +161,12 @@ void DrawBitmap (struct fbjar jar, bitmap bmap, point top, color RGB) {
 	assert(CheckInJar(jar, top.y+bmap.heigth, top.x+bmap.width));
 	assert(bmap.cont!=NULL);
 	uint8* location = GetFbPos(jar, top.y, top.x);
-	int rollback = jar.bpp*(CHARLINELEN*bmap.width);
+	int rollback = jar.bpp*(bmap.width);
 	for (int i = 0 ; i<(bmap.heigth); i++) {
-		for (uint j = 0 ; j<(CHARLINELEN*bmap.width) ; j++) {
-			location[0] = ((bmap.cont[i] & (1<<(8-j%8)))!=0)*RGB.B;
-			location[1] = ((bmap.cont[i] & (1<<(8-j%8)))!=0)*RGB.G;
-			location[2] = ((bmap.cont[i] & (1<<(8-j%8)))!=0)*RGB.R;
+		for (uint j = 0 ; j<(bmap.width) ; j++) {
+			location[0] = ((bmap.cont[i] & (1<<((7-j)%8)))!=0)*RGB.B;
+			location[1] = ((bmap.cont[i] & (1<<((7-j)%8)))!=0)*RGB.G;
+			location[2] = ((bmap.cont[i] & (1<<((7-j)%8)))!=0)*RGB.R;
 			location += jar.bpp;
 		}
 		location -= rollback;
@@ -180,15 +180,15 @@ void ApplyBitmap (struct fbjar jar, bitmap bmap, point top, color RGB) {
 	assert(bmap.cont);
 	uint8* location = GetFbPos(jar, top.y, top.x);
 	for (int i = 0 ; i<(bmap.heigth); i++) {
-		for (uint j = 0 ; j<(CHARLINELEN*bmap.width) ; j++) {
-			if ((bmap.cont[i] & (1<<(8-j%8)))!=0) {
+		for (uint j = 0 ; j<(bmap.width) ; j++) {
+			if ((bmap.cont[i] & (1<<(7-j%8)))!=0) {
 				location[0] = RGB.B;
 				location[1] = RGB.G;
 				location[2] = RGB.R;
 			}
 			location += jar.bpp;
 		}
-		location -= jar.bpp*(CHARLINELEN*bmap.width);
+		location -= jar.bpp*(bmap.width);
 		location += jar.skip;
 	}
 }
@@ -197,9 +197,9 @@ bytesmap SaveBytes ( struct fbjar jar, point top, point bot) {
 	assert(CheckPIJ(jar, top));
 	assert(CheckPIJ(jar, bot));
 
-	int size = (bot.y-top.y)+(bot.x-top.x);
 	int limy = bot.y-top.y;
 	int limx = bot.x-top.x;
+	int size = limy*limx+1;
 	uint8* location = GetFbPnt(jar, top);
 
 	bytesmap map;
@@ -207,8 +207,8 @@ bytesmap SaveBytes ( struct fbjar jar, point top, point bot) {
 	for (int i = 0; i < limy; i++ ) {
 		for (int j = 0; j < limx; j++ ) {
 			cols[0+i*limx+j].B = location[0 + jar.skip*i + jar.bpp*j];
-			cols[1+i*limx+j].G = location[1 + jar.skip*i + jar.bpp*j];
-			cols[2+i*limx+j].R = location[2 + jar.skip*i + jar.bpp*j];
+			cols[0+i*limx+j].G = location[1 + jar.skip*i + jar.bpp*j];
+			cols[0+i*limx+j].R = location[2 + jar.skip*i + jar.bpp*j];
 		}
 	}
 	map.cont = cols;
@@ -217,10 +217,62 @@ bytesmap SaveBytes ( struct fbjar jar, point top, point bot) {
 	return map;
 }
 
-void DrawBytes ( struct fbjar jar, point top, point bot, bytesmap map) {
+bytesmap RSaveBytes ( struct fbjar jar, point top, point len) {
+	assert(CheckPIJ(jar, top));
+	assert(CheckPIJ(jar, len));
 
+	int size = len.y*len.x;
+	uint8* location = GetFbPnt(jar, top);
+
+	bytesmap map;
+	color* cols = malloc(size * sizeof(color));
+	for (int i = 0; i < len.y; i++ ) {
+		for (int j = 0; j < len.x; j++ ) {
+			cols[0+i*len.x+j].B = location[0 + jar.skip*i + jar.bpp*j];
+			cols[1+i*len.x+j].G = location[1 + jar.skip*i + jar.bpp*j];
+			cols[2+i*len.x+j].R = location[2 + jar.skip*i + jar.bpp*j];
+		}
+	}
+	map.cont = cols;
+	map.heigth = len.y;
+	map.width = len.x;
+	return map;
 }
 
-void ApplyBytes ( struct fbjar jar, point top, point bot, bytesmap map) {
+void DrawBytesmap ( struct fbjar jar, bytesmap map, point top) {
+	point len = MakePoint(map.heigth, map.width);
+	assert(CheckPIJ(jar, top));
+	assert(CheckInJar(jar, map.heigth+top.y, map.width+top.x));
 
+	uint8* location = GetFbPnt(jar, top);
+	color* cols = map.cont;
+
+	for (int i = 0; i < len.y; i++ ) {
+		for (int j = 0; j < len.x; j++ ) {
+			location[0 + jar.skip*i + jar.bpp*j] = cols[0+i*len.x+j].B;
+			location[1 + jar.skip*i + jar.bpp*j] = cols[0+i*len.x+j].G;
+			location[2 + jar.skip*i + jar.bpp*j] = cols[0+i*len.x+j].R;
+		}
+	}
+}
+
+void ApplyBytesmap ( struct fbjar jar, bytesmap map, point top) {
+	point len = MakePoint(map.heigth, map.width);
+	assert(CheckPIJ(jar, top));
+	assert(CheckInJar(jar, map.heigth+top.y, map.width+top.x));
+
+	uint8* location = GetFbPnt(jar, top);
+	color* cols = map.cont;
+	color RGB;
+
+	for (int i = 0; i < len.y; i++ ) {
+		for (int j = 0; j < len.x; j++ ) {
+			RGB = cols[0+i*len.x+j];
+			if (RGB.R|RGB.G|RGB.B) {
+				location[0 + jar.skip*i + jar.bpp*j] = RGB.B;
+				location[1 + jar.skip*i + jar.bpp*j] = RGB.G;
+				location[2 + jar.skip*i + jar.bpp*j] = RGB.R;
+			}
+		}
+	}
 }
