@@ -10,9 +10,22 @@ int main(int argc, char* argv[]){
 	assert(mice != -1);
 	printf("reading mouse from fd%d\n", mice);
 
+	bitmap b;
+	b.heigth = 8;
+	b.width = 1;
+	uint8 cont[] = {
+		254,
+		192,
+		160,
+		144,
+		136,
+		132,
+		2,
+		1
+	};
+	b.cont = cont;
+	color green = RGB(0,255,0);
 	point loc = MakePoint(100, 100);
-	polar PointerM = MakePolar(12, 45);
-	color black = RGB(0,0,0);
 
 	uint8 buff[3] = {0};
 	int8 ry, rx;
@@ -40,16 +53,11 @@ int main(int argc, char* argv[]){
 			if (middle) {
 				printf("pressed middle button @ %d,%d\n", loc.y, loc.x);
 			}
-			//read and save pixels from fbmem, then rewrite
-			DrawPolarLine(jar, loc, PointerM, black);
-			DrawPartLine(jar, loc.y, loc.x, loc.x+4, black);
-			DrawPartCollum(jar, loc.x, loc.y, loc.y+3, black);
+
 			loc.y-=ry;
 			loc.x+=rx;
-			SDrawPolarLine(jar, loc, PointerM);
-			SDrawPartLine(jar, loc.y, loc.x, loc.x+4);
-			SDrawPartCollum(jar, loc.x, loc.y, loc.y+3);
-			//printf("y:%d, x:%d\n", loc.y, loc.x);
+			ApplyBitmap(jar, b, loc, green);
 		}
 	}
 }
+
