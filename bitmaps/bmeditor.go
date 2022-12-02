@@ -75,7 +75,7 @@ func ReadBytesMap(filename string) (bytesmap) {
 
 func main(){
 	InitTermin()
-	x:=ReadBytesMap("test.btm")
+	x:=ReadBytesMap("test.btsm")
 	PS(x)
 
 	StopTermin()
