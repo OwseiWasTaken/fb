@@ -47,7 +47,6 @@ class ByteMap:
 		this.data = data
 		this.filename = filename
 
-
 	def save(this, filename=None):
 		file = this.filename
 		if filename:
@@ -55,7 +54,7 @@ class ByteMap:
 		assert file != None, "need filename"
 		with open(file, 'wb') as f:
 			f.write(bytes( SingleList(list(map( itob, [this.h, this.w]) )) ))
-			f.write(bytes(  SingleList(itob(len(SingleList(this.data))//3)) ))
+			f.write(bytes( SingleList(itob(len(SingleList(this.data))//3)) ))
 			f.write(bytes( SingleList(this.data) ))
 
 	def show(this):
@@ -90,13 +89,21 @@ def ReadByteMap(filename:str) -> ByteMap:
 	return ByteMap(h, w, cont)
 
 def main() -> int:
-	x = (ReadByteMap("out.btm"))
-	x.show()
-	#b = ByteMap(256,2, [
-	#	(255,255,255),(0,0,255),
-	#	(255,0,0),(255,255,255),
-	#], "out.btm")
-	#b.save()
+	read = get("-r", "--read")
+	doread = read.exists
+	readfile = read.first
+	assert (not readfile) ^ doread, "if --read, file must be provided"
+
+	write = get("-w", "--write")
+	dowrite = write.exists
+	writefile = write.first
+	assert (not writefile)^ dowrite, "if --write, file must be provided"
+
+	b = ByteMap(2,2, [
+		(255,255,255),(  0,  0,255),
+		(255,  0,  0),(  0,255,  0),
+	], "test.btm")
+	b.save()
 
 	return 0
 
