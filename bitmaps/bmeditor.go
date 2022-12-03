@@ -83,6 +83,45 @@ func main(){
 }
 
 
+func ReadByteMap(filename string) (bytemap) {
+	var (
+		bflcont = ReadFileBytes(filename)
+		flcont []int = make([]int, len(bflcont))
+		off int = 0
+		szh int
+		h int
+		szw int
+		w int
+		szszc int
+		szc int
+		c []uint8
+	)
+	for i:=0;i<len(bflcont);i++ {
+		flcont[i] = int(bflcont[i])
+	}
+	szh = flcont[off]
+	off++
+	h = ParseBInt(szh, flcont[off:])
+	off += szh
+
+	//printf("@%d in %v\n", off, flcont)
+	szw = flcont[off]
+	off++
+	w = ParseBInt(szh, flcont[off:])
+	off += szw
+
+	//printf("@%d in %v\n", off, flcont)
+	szszc = flcont[off]
+	off++
+	szc = 3*ParseBInt(szszc, flcont[off:])
+	off += szszc
+	//printf("@%d in %v\n", off, flcont)
+	c = make([]uint8, szc)
+	for i:=off;i<off+szc;i++ {
+		c[i] = uint8(flcont[i])
+	}
+	return bytemap{filename, c, w, h}
+}
 
 
 type bytemap struct {
