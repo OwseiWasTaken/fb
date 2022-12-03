@@ -126,8 +126,8 @@ void SDrawPolarLine(
 }
 
 void SDrawCircle (
-	 struct fbjar jar,
-	 point top, int r
+	struct fbjar jar,
+	point top, int r
 ) {
 	point bot = MakePoint(top.y+r+r, top.x+r+r);
 	assert(CheckPIJ(jar, bot));
@@ -151,8 +151,8 @@ void SDrawCircle (
 }
 
 void SFillCircle (
-	 struct fbjar jar,
-	 point top, int r
+	struct fbjar jar,
+	point top, int r
 ) {
 	point bot = MakePoint(top.y+r+r, top.x+r+r);
 	assert(CheckPIJ(jar, bot));
