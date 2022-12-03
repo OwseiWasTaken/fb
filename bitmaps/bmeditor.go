@@ -3,17 +3,15 @@ package main
 include "gutil"
 Include "termin"
 
-type clr struct {
-	R uint8
-	G uint8
-	B uint8
-}
+func main(){
+	InitTermin()
+	x:=ReadBytesMap("test.btsm")
+	PS(x)
+	y:=ReadByteMap("test.btm")
+	PS(y)
 
-type bytesmap struct {
-	filename string
-	cont []clr
-	width int
-	height int
+	StopTermin()
+	exit(0)
 }
 
 // n, offset
@@ -35,7 +33,6 @@ func ReadBytesMap(filename string) (bytesmap) {
 		h int
 		szw int
 		w int
-		szszc int
 		szc int
 		c []int
 		cs []clr
@@ -54,13 +51,9 @@ func ReadBytesMap(filename string) (bytesmap) {
 	w = ParseBInt(szh, flcont[off:])
 	off += szw
 
-	//printf("@%d in %v\n", off, flcont)
-	szszc = flcont[off]
-	off++
-	szc = 3*ParseBInt(szszc, flcont[off:])
-	off += szszc
-	//printf("@%d in %v\n", off, flcont)
+	szc = 3*h*w
 	c = flcont[off:off+szc]
+	//printf("%v\n", c)
 	cs = make([]clr, len(c)/3)
 	for i:=0;i<len(c);i+=3 {
 		//printf("@%d in %v\n»@%d in %v\n", i, c, i, cs)
@@ -73,17 +66,20 @@ func ReadBytesMap(filename string) (bytesmap) {
 	return bytesmap{filename, cs, w, h}
 }
 
-func main(){
-	InitTermin()
-	x:=ReadBytesMap("test.btsm")
-	PS(x)
-
-	StopTermin()
-	exit(0)
+type clr struct {
+	R uint8
+	G uint8
+	B uint8
 }
 
+type bytesmap struct {
+	filename string
+	cont []clr
+	width int
+	height int
+}
 
-func ReadByteMap(filename string) (bytemap) {
+func ReadByteMap(filename string) (bytemap) {;
 	var (
 		bflcont = ReadFileBytes(filename)
 		flcont []int = make([]int, len(bflcont))
@@ -92,7 +88,6 @@ func ReadByteMap(filename string) (bytemap) {
 		h int
 		szw int
 		w int
-		szszc int
 		szc int
 		c []uint8
 	)
@@ -110,25 +105,58 @@ func ReadByteMap(filename string) (bytemap) {
 	w = ParseBInt(szh, flcont[off:])
 	off += szw
 
-	//printf("@%d in %v\n", off, flcont)
-	szszc = flcont[off]
-	off++
-	szc = 3*ParseBInt(szszc, flcont[off:])
-	off += szszc
-	//printf("@%d in %v\n", off, flcont)
+	szc = w*h
 	c = make([]uint8, szc)
-	for i:=off;i<off+szc;i++ {
-		c[i] = uint8(flcont[i])
+	//printf("%v\n", c)
+	for i:=0;i<szc;i++ {
+		c[i] = bflcont[off+i]
 	}
 	return bytemap{filename, c, w, h}
 }
-
 
 type bytemap struct {
 	filename string
 	cont []uint8
 	width int
 	height int
+}
+
+func ReadBitMap(filename string) (bitmap) {
+	var (
+		bflcont = ReadFileBytes(filename)
+		flcont = []int{}
+		off int
+		szh int
+		h int
+		szw int
+		w int
+		szc int
+		c []int
+	)
+	for i:=0;i<len(bflcont);i++ {
+		flcont[i] = int(bflcont[i])
+	}
+	return bitmap{}
+	szh = flcont[off]
+	off++
+	h = ParseBInt(szh, flcont[off:])
+	off += szh
+
+	//printf("@%d in %v\n", off, flcont)
+	szw = flcont[off]
+	off++
+	w = ParseBInt(szh, flcont[off:])*8
+	off += szw
+
+	szc = h*w
+	c = make([]bool, szc)
+	//printf("%v\n", c)
+	for i:=0;i<szc;i++ {
+		for j:=0;j<8;j++ {
+			c[i*8+j] = bflcont[off+i]&(1<<(8-j%8))
+		}
+	}
+	return bitmap{filename, c, w, h}
 }
 
 type bitmap struct {
