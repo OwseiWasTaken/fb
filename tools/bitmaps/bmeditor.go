@@ -5,8 +5,6 @@ Include "termin"
 const (
 	FullChar = '@'
 	EmptyChar = '.'
-	CFullChar = '#'
-	CEmptyChar = 'o'
 	nc = "\x1b[38;2;255;255;255m"
 	yellow = "\x1b[38;2;255;255;0m"
 	blue = "\x1b[38;2;0;0;255m"
