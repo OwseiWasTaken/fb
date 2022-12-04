@@ -26,6 +26,7 @@
 // simple defs
 typedef unsigned int uint;
 typedef unsigned char uint8;
+typedef unsigned char byte;
 typedef char int8;
 
 #define PI 3.141592
@@ -75,7 +76,7 @@ typedef struct {
 // one bit for each
 // only control is on/off
 typedef struct {
-	uint8* cont;
+	bool* cont;
 	int heigth, width;
 } bitmap;
 
@@ -86,7 +87,7 @@ typedef struct {
 //  and give up some intensity control
 // full control intensity, for now
 typedef struct {
-	uint8* cont;
+	byte* cont;
 	int heigth, width;
 } bytemap;
 
