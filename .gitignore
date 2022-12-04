@@ -1,5 +1,4 @@
 *.txt
 *.vim
 *.sh
-apps/*
-!apps/*.c
+examples/bin
