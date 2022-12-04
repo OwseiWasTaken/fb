@@ -8,6 +8,10 @@ type bytesmap struct {
 	width, height int
 }
 
+//////////////////////////
+////////// back //////////
+//////////////////////////
+
 func ReadBytesMap(filename string) (bytesmap) {
 	var (
 		bflcont = ReadFileBytes(filename)
@@ -43,3 +47,7 @@ func ReadBytesMap(filename string) (bytesmap) {
 	}
 	return bytesmap{filename, cs, w, h}
 }
+///////////////////////////
+////////// front //////////
+///////////////////////////
+
