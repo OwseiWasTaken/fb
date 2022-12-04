@@ -164,9 +164,9 @@ void DrawBitmap (struct fbjar jar, bitmap bmap, point top, color RGB) {
 	int rollback = jar.bpp*(bmap.width);
 	for (int i = 0 ; i<(bmap.heigth); i++) {
 		for (uint j = 0 ; j<(bmap.width) ; j++) {
-			location[0] = ((bmap.cont[i] & (1<<((7-j)%8)))!=0)*RGB.B;
-			location[1] = ((bmap.cont[i] & (1<<((7-j)%8)))!=0)*RGB.G;
-			location[2] = ((bmap.cont[i] & (1<<((7-j)%8)))!=0)*RGB.R;
+			location[0] = bmap.cont[i*bmap.width+j]*RGB.B;
+			location[1] = bmap.cont[i*bmap.width+j]*RGB.G;
+			location[2] = bmap.cont[i*bmap.width+j]*RGB.R;
 			location += jar.bpp;
 		}
 		location -= rollback;
@@ -181,7 +181,7 @@ void ApplyBitmap (struct fbjar jar, bitmap bmap, point top, color RGB) {
 	uint8* location = GetFbPos(jar, top.y, top.x);
 	for (int i = 0 ; i<(bmap.heigth); i++) {
 		for (uint j = 0 ; j<(bmap.width) ; j++) {
-			if ((bmap.cont[i] & (1<<(7-j%8)))!=0) {
+			if (bmap.cont[i*bmap.width+j]) {
 				location[0] = RGB.B;
 				location[1] = RGB.G;
 				location[2] = RGB.R;
