@@ -6,6 +6,10 @@ type bitmap struct {
 	height int
 }
 
+//////////////////////////
+////////// back //////////
+//////////////////////////
+
 func ReadBitMap(filename string) (bitmap) {
 	var (
 		bflcont = ReadFileBytes(filename)
@@ -74,7 +78,7 @@ func (b bitmap) save () {
 	}
 
 	for j:=0; j<lb; j++ {;
-		printf("%d -> %d\n", j, lb)
+		//printf("%d -> %d\n", j, lb)
 		out[off] = c[j]
 		off++
 	}
@@ -84,10 +88,47 @@ func (b bitmap) save () {
 	//	off++
 	//}
 
-	PS(b, out)
 	err := os.WriteFile(b.filename, out, 0644) // 1X 2W 4R
 	panic(err)
 }
+
+func (b bitmap) copy (filename string) {
+	k := b.filename
+	b.filename = filename
+	b.save()
+	b.filename = k
+}
+
+func (b bitmap) export (tp int, filename string) {
+	fo, err := os.Create(filename)
+	panic(err)
+	defer func() {
+		panic(fo.Close())
+	}()
+	switch tp {
+		case Exp_C:
+			fprintf(fo, "bitmap b;\n")
+			fprintf(fo, "b.height = %d;\n", b.height)
+			fprintf(fo, "b.width = %d;\n", b.width)
+			fprintf(fo, "uint8 cont[] = {\n\t")
+			i:=0
+			for ; i<(b.width*b.height/8)-1; i++ {
+				if i%(b.width/8) == 0 && i > 0{
+					fprintf(fo, "\n\t")
+				}
+				fprintf(fo, "%3d,", int(b.btcont[i]))
+			}
+			fprintf(fo, "%d\n", int(b.btcont[i]))
+			fprintf(fo, "};\n")
+			fprintf(fo, "b.cont = cont;\n")
+		default:
+			printf("No such Export type %d\n", tp)
+	}
+}
+
+///////////////////////////
+////////// front //////////
+///////////////////////////
 
 func (b bitmap) Draw (yoff, xoff int) {
 	for i:=0; i<b.height; i++ {

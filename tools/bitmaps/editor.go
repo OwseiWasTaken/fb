@@ -11,13 +11,13 @@ const (
 	nc = "\x1b[38;2;255;255;255m"
 	yellow = "\x1b[38;2;255;255;0m"
 	blue = "\x1b[38;2;0;0;255m"
+	Exp_C = iota
 )
 
 func main(){
 	InitTermin()
 	bit := ReadBitMap("./tests/test.bim")
-	bit.filename = "new.bim"
-	bit.save()
+	bit.export(Exp_C, "new.c")
 
 	StopTermin()
 	exit(0)
