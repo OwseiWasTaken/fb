@@ -9,7 +9,7 @@ void SDrawAllLine (
 	int x;
 
 	//memset()
-	for (x = 0;x<jar.rows;x++) {
+	for (x = 0;x<jar.cols;x++) {
 		location[0 + x*jar.bpp] = 255;
 		location[1 + x*jar.bpp] = 255;
 		location[2 + x*jar.bpp] = 255;
@@ -24,7 +24,7 @@ void SDrawAllCollum (
 	uint8* location = GetFbPos(jar, 0, x);
 	int y;
 
-	for (y = 0;y<jar.cols;y++) {
+	for (y = 0;y<jar.rows;y++) {
 		location[0 + y*jar.skip] = 255;
 		location[1 + y*jar.skip] = 255;
 		location[2 + y*jar.skip] = 255;
@@ -177,11 +177,6 @@ void SFillCircle (
 			}
 		}
 	}
-}
-
-void SwapBuffers(struct fbjar jar, uint8* newbuff, uint8* storebuff) {;
-	if (storebuff != NULL) storebuff = jar.fbmem;
-	jar.fbmem = newbuff;
 }
 
 void SDrawBitmap (struct fbjar jar, bitmap bmap, point top) {
