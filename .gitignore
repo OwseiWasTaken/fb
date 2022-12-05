@@ -2,4 +2,4 @@
 *.vim
 *.sh
 examples/bin
-tools/*/tests
+tools/*/tests/*
