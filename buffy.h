@@ -51,6 +51,7 @@ struct fbjar {
 	char* tty;
 };
 
+// intensity and color
 typedef struct {
 	uint8 R, G, B;
 } color;
@@ -64,8 +65,7 @@ typedef struct {
 } ppoint;
 
 typedef struct {
-	float a;
-	float r;
+	float a, r;
 } polar;
 
 typedef struct {
