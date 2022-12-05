@@ -20,8 +20,6 @@
 #include <assert.h>
 #include <fcntl.h>
 
-// include initers / funcs
-
 
 // simple defs
 typedef unsigned int uint;

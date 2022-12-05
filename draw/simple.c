@@ -210,7 +210,7 @@ void SApplyBitmap (struct fbjar jar, bitmap bmap, point top) {
 	}
 }
 
-void DrawBytemap (struct fbjar jar, bytemap bmap, point top) {
+void SDrawBytemap (struct fbjar jar, bytemap bmap, point top) {
 	uint8* location = GetFbPos(jar, top.y, top.x);
 	for (uint i = 0 ; i<(bmap.heigth); i++) {
 		for (uint j = 0 ; j<(bmap.width) ; j++) {
@@ -224,7 +224,7 @@ void DrawBytemap (struct fbjar jar, bytemap bmap, point top) {
 	}
 }
 
-void ApplyBytemap (struct fbjar jar, bytemap bmap, point top) {
+void SApplyBytemap (struct fbjar jar, bytemap bmap, point top) {
 	uint8* location = GetFbPos(jar, top.y, top.x);
 	for (int i = 0 ; i<(bmap.heigth); i++) {
 		for (uint j = 0 ; j<(bmap.width) ; j++) {
