@@ -32,7 +32,7 @@ func ReadBitMap(filename string) (bitmap) {
 	//printf("@%d in %v\n", off, flcont)
 	szw = flcont[off]
 	off++
-	w = ParseBInt(szh, flcont[off:])*8
+	w = ParseBInt(szh, flcont[off:])
 	off += szw
 
 	szc = h*w
@@ -55,6 +55,7 @@ func (b bitmap) save () {
 		h = UnparseBInt(b.height)
 		szw = byte(b.width/255+1)
 		w = UnparseBInt(b.width/8)
+		// TODO: compact bool cont -> byte cont to save
 		c = b.btcont
 		lb = len(b.btcont)
 		//c = len(b.cont)
@@ -126,6 +127,22 @@ func (b bitmap) export (tp int, filename string) {
 	}
 }
 
+func (b *bitmap) Expand (y, x int) {
+	var nh = b.height+y
+	var nw = b.width+x
+	var ncont = make([]bool, (nh)*(nw))
+	for i:=0; i<nh; i++ {
+		for j:=0; j<nw; j++ {
+			if (b.width > j) && (b.height > i) {
+				ncont[nw*i+j] = b.cont[b.width*i+j]
+			}
+		}
+	}
+	b.width = nw
+	b.height = nh
+	b.cont = ncont
+}
+
 ///////////////////////////
 ////////// front //////////
 ///////////////////////////
@@ -158,15 +175,23 @@ func (bit bitmap) Interact () {
 	var (
 		k string
 		y, x int
-		options = []string{"Yes", "No"}
 		limy = bit.height; limx = bit.width
 		offy = 4
 		offx = 3
 		menu = MakeWin("Menu", stdout, stdin, 2, 2+15, 2, 2+50)
+		answ string
+		DelAll = false
+		PutAll = false
 	)
-	Win.name = "bitmap editor"
+	Win.name = spf("bitmap editor [%s]", bit.filename)
 	wDrawBorderName(Win, '#')
 	for {
+		if DelAll {
+			bit.cont[y*bit.width+x] = false
+		} else if PutAll {
+			bit.cont[y*bit.width+x] = true
+		}
+
 		DrawCoors(y, x, bit.height, bit.width)
 		bit.Draw(offy, offx)
 		wmove(Win, offy+y, offx+x)
@@ -182,14 +207,72 @@ func (bit bitmap) Interact () {
 			x = (x+1)%limx
 		case "space":
 			bit.cont[y*bit.width+x] = !bit.cont[y*bit.width+x]
+		case "c":
+			DelAll = false
+			PutAll = !PutAll
+		case "x":
+			DelAll = !DelAll
+			PutAll = false
+		case "z":
+			DelAll = false
+			PutAll = false
+
+		case "^L":
+			for i:=0; i<bit.height; i++ {
+				for j:=0; j<bit.width; j++ {
+					bit.cont[bit.width*i+j] = false
+				}
+			}
+		case "^K":
+			for i:=0; i<bit.height; i++ {
+				for j:=0; j<bit.width; j++ {
+					bit.cont[bit.width*i+j] = true
+				}
+			}
+
+		case "n":
+			clear()
+			wprint(Win, 0, 0, spf("current height: %d\n", bit.height))
+			wmove(Win, 1, 0)
+			wFlush(Win)
+
+			addy:=GetInt("y>")
+
+			clear()
+			wprint(Win, 0, 0, spf("current width: %d\n", bit.width))
+			wmove(Win, 1, 0)
+			wFlush(Win)
+
+			addx:=GetInt("x>")
+
+			wDrawLine(Win, offy-1, ' ')
+			wDrawBorderName(Win, '#')
+
+			bit.Expand(addy,addx)
+			limy = bit.height; limx = bit.width
+
+		case "r":
+			clear()
+			wprint(Win, 0, 0, spf("current name: %s\n", bit.filename))
+			wmove(Win, 1, 0)
+			wFlush(Win)
+			name:=oldinput(">")
+			bit.filename = name
+
+			wDrawBorderName(Win, '#')
+			Win.name = spf("bitmap editor [%s]", bit.filename)
+
 		case "f9":
 			clear()
 			wDrawBorderName(Win, '#')
 			wDrawBorderName(menu, '#')
 			wprint(menu, 2, 2, spf("file: %s", bit.filename))
 			wprint(menu, 3, 2, spf("%d bytes to save", bit.width*bit.height/8))
-			//TODO: use YorN answ
-			YorN(menu, "Save?", options...)
+			answ = YorN(menu, "Save?", "Yes", "No")
+			if answ == "Yes" {
+				bit.save()
+				return
+			}
 			clear()
 			wDrawBorderName(Win, '#')
 		}
