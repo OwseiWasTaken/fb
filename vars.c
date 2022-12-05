@@ -61,7 +61,15 @@ void CloseFb(struct fbjar jar) {
 	munmap(jar.fbmem, jar.screensize);
 	fflush(jar.log);
 	fclose(jar.log);
+	jar.tty = NULL;
 	close(jar.fd);
+}
+
+void StopBuffy(struct fbjar jar) {
+	CloseFb(GlobalJar);
+	if (jar.tty != NULL) {
+		CloseFb(jar);
+	}
 }
 
 void InitTerm ( struct fbjar jar ) {
@@ -252,3 +260,9 @@ bool PInP(point top, point bot, point check) {
 		bot.x > check.x
 	);
 }
+
+void SwapBuffers(struct fbjar jar, uint8* newbuff, uint8* storebuff) {;
+	if (storebuff != NULL) storebuff = jar.fbmem;
+	jar.fbmem = newbuff;
+}
+
