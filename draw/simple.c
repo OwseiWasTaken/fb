@@ -239,3 +239,6 @@ void SApplyBytemap (struct fbjar jar, bytemap bmap, point top) {
 		location += jar.skip;
 	}
 }
+#define ApplyBytemap SApplyBytemap
+#define DrawBytemap SDrawBytemap
+
