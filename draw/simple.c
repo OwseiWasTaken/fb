@@ -1,29 +1,33 @@
-// func structures
-// name (
-//	args
-// ) {
-// preprocess
-//
-// asserts
-//
-// vars
-//
-// run
-// }
-// simple funcs
-
 //TODO: DrawAllLine/Collum
 
-void SDrawAllLine (struct fbjar jar, int y) {
+void SDrawAllLine (
+	struct fbjar jar, int y
+) {
 	assert(CheckInJar(jar, y, 0));
 
 	uint8* location = GetFbPos(jar, y, 0);
 	int x;
 
-	for (x = 0;x<jar.skip;x+=jar.bpp) {
-		*(location + x) = 255;
-		*(location + 1 + x) = 255;
-		*(location + 2 + x) = 255;
+	//memset()
+	for (x = 0;x<jar.rows;x++) {
+		location[0 + x*jar.bpp] = 255;
+		location[1 + x*jar.bpp] = 255;
+		location[2 + x*jar.bpp] = 255;
+	}
+}
+
+void SDrawAllCollum (
+	struct fbjar jar, int x
+) {
+	assert(CheckInJar(jar, 0, x));
+
+	uint8* location = GetFbPos(jar, 0, x);
+	int y;
+
+	for (y = 0;y<jar.cols;y++) {
+		location[0 + y*jar.skip] = 255;
+		location[1 + y*jar.skip] = 255;
+		location[2 + y*jar.skip] = 255;
 	}
 }
 
@@ -193,7 +197,6 @@ void SDrawBitmap (struct fbjar jar, bitmap bmap, point top) {
 		location += jar.skip;
 	}
 }
-#define DrawBitmap SDrawBitmap
 
 void SApplyBitmap (struct fbjar jar, bitmap bmap, point top) {
 	uint8* location = GetFbPos(jar, top.y, top.x);
@@ -210,7 +213,6 @@ void SApplyBitmap (struct fbjar jar, bitmap bmap, point top) {
 		location += jar.skip;
 	}
 }
-#define ApplyBitmap SApplyBitmap
 
 void SDrawBytemap (struct fbjar jar, bytemap bmap, point top) {
 	uint8* location = GetFbPos(jar, top.y, top.x);
@@ -225,7 +227,6 @@ void SDrawBytemap (struct fbjar jar, bytemap bmap, point top) {
 		location += jar.skip;
 	}
 }
-#define DrawBytemap SDrawBytemap
 
 void SApplyBytemap (struct fbjar jar, bytemap bmap, point top) {
 	uint8* location = GetFbPos(jar, top.y, top.x);
@@ -242,5 +243,4 @@ void SApplyBytemap (struct fbjar jar, bytemap bmap, point top) {
 		location += jar.skip;
 	}
 }
-#define ApplyBytemap SApplyBytemap
 
