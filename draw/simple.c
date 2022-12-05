@@ -142,9 +142,9 @@ void SDrawCircle (
 					isquare(x)+isquare(y)+sr>=-r &&
 					isquare(x)+isquare(y)+sr<=r
 				) {
-				*(location + 0 + (x+r)*jar.bpp + (y+r)*jar.skip) = 255;
-				*(location + 1 + (x+r)*jar.bpp + (y+r)*jar.skip) = 255;
-				*(location + 2 + (x+r)*jar.bpp + (y+r)*jar.skip) = 255;
+				location[0 + (x+r)*jar.bpp + (y+r)*jar.skip] = 255;
+				location[1 + (x+r)*jar.bpp + (y+r)*jar.skip] = 255;
+				location[2 + (x+r)*jar.bpp + (y+r)*jar.skip] = 255;
 			}
 		}
 	}
@@ -193,6 +193,7 @@ void SDrawBitmap (struct fbjar jar, bitmap bmap, point top) {
 		location += jar.skip;
 	}
 }
+#define DrawBitmap SDrawBitmap
 
 void SApplyBitmap (struct fbjar jar, bitmap bmap, point top) {
 	uint8* location = GetFbPos(jar, top.y, top.x);
@@ -209,6 +210,7 @@ void SApplyBitmap (struct fbjar jar, bitmap bmap, point top) {
 		location += jar.skip;
 	}
 }
+#define ApplyBitmap SApplyBitmap
 
 void SDrawBytemap (struct fbjar jar, bytemap bmap, point top) {
 	uint8* location = GetFbPos(jar, top.y, top.x);
@@ -223,6 +225,7 @@ void SDrawBytemap (struct fbjar jar, bytemap bmap, point top) {
 		location += jar.skip;
 	}
 }
+#define DrawBytemap SDrawBytemap
 
 void SApplyBytemap (struct fbjar jar, bytemap bmap, point top) {
 	uint8* location = GetFbPos(jar, top.y, top.x);
@@ -240,5 +243,4 @@ void SApplyBytemap (struct fbjar jar, bytemap bmap, point top) {
 	}
 }
 #define ApplyBytemap SApplyBytemap
-#define DrawBytemap SDrawBytemap
 
