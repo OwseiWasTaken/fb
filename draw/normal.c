@@ -306,3 +306,43 @@ void ApplyBytesmap ( struct fbjar jar, bytesmap map, point top) {
 		}
 	}
 }
+
+// RGB
+void DrawBytemap (struct fbjar jar, bytemap bmap, point top, int chan) {
+	uint8* location = GetFbPos(jar, top.y, top.x);
+	int chanb, chang, chanr;
+	chanr = (chan&0b100)>>2?2:3;
+	chang = (chan&0b010)>>1?1:3;
+	chanb = (chan&0b001)>>0?0:3;
+	for (uint i = 0 ; i<(bmap.heigth); i++) {
+		for (uint j = 0 ; j<(bmap.width) ; j++) {
+			location[chanb] = bmap.cont[i*bmap.width+j];
+			location[chang] = bmap.cont[i*bmap.width+j];
+			location[chanr] = bmap.cont[i*bmap.width+j];
+			location += jar.bpp;
+		}
+		location -= jar.bpp*(bmap.width);
+		location += jar.skip;
+	}
+}
+
+void ApplyBytemap (struct fbjar jar, bytemap bmap, point top, int chan) {
+	uint8* location = GetFbPos(jar, top.y, top.x);
+	int chanb, chang, chanr;
+	chanr = (chan&0b100)>>2?2:3;
+	chang = (chan&0b010)>>1?1:3;
+	chanb = (chan&0b001)>>0?0:3;
+	for (int i = 0 ; i<(bmap.heigth); i++) {
+		for (uint j = 0 ; j<(bmap.width) ; j++) {
+			if (bmap.cont[i*bmap.width+j]) {
+				location[chanb] = bmap.cont[i*bmap.width+j];
+				location[chang] = bmap.cont[i*bmap.width+j];
+				location[chanr] = bmap.cont[i*bmap.width+j];
+			}
+			location += jar.bpp;
+		}
+		location -= jar.bpp*(bmap.width);
+		location += jar.skip;
+	}
+}
+

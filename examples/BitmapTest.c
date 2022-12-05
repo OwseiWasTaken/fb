@@ -18,18 +18,18 @@ int main (int argc, char** argv) {
 	b.heigth = 8;
 	b.width = 3;
 	byte cont[] = {
-		255,0,127,
-		255,0,127,
-		255,0,127,
-		255,0,127,
-		255,0,127,
-		255,0,127,
-		255,0,127,
-		255,0,127
+		255,8,127,
+		255,8,127,
+		255,8,127,
+		255,8,127,
+		255,8,127,
+		255,8,127,
+		255,8,127,
+		255,8,127
 	};
 	b.cont = cont;
 	point at = MakePoint(100,1000);
 	if (argc-1) {
-		DrawBytemap(jar, b, at);
+		ApplyBytemap(jar, b, at, 0b111);
 	}
 }
