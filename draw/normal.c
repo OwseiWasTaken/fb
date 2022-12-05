@@ -1,3 +1,33 @@
+void DrawAllLine (
+	struct fbjar jar, int y, color RGB
+) {
+	assert(CheckInJar(jar, y, 0));
+
+	uint8* location = GetFbPos(jar, y, 0);
+	int x;
+
+	for (x = 0;x<jar.rows;x++) {
+		location[0 + x*jar.bpp] = RGB.B;
+		location[1 + x*jar.bpp] = RGB.G;
+		location[2 + x*jar.bpp] = RGB.R;
+	}
+}
+
+void DrawAllCollum (
+	struct fbjar jar, int x, color RGB
+) {
+	assert(CheckInJar(jar, 0, x));
+
+	uint8* location = GetFbPos(jar, 0, x);
+	int y;
+
+	for (y = 0;y<jar.cols;x++) {
+		location[0 + x*jar.skip] = RGB.B;
+		location[1 + x*jar.skip] = RGB.G;
+		location[2 + x*jar.skip] = RGB.R;
+	}
+}
+
 void DrawPartLine (
 	struct fbjar jar,
 	int y, int StartX, int EndX,
