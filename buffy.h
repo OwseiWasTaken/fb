@@ -33,6 +33,10 @@ typedef char int8;
 // written char width in pixels
 #define CHARLINELEN 8
 
+#define CHAN_R 0b100
+#define CHAN_G 0b010
+#define CHAN_B 0b001
+
 
 // complex defs
 struct fbjar {
