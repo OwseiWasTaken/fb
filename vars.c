@@ -57,6 +57,51 @@ struct fbjar InitFb()
 	return jar;
 }
 
+// don't open /dev/fb, just malloc
+struct fbjar InitMemJar () {
+	int fbfd = 0;
+	uint8 *fbp = 0;
+	long int screensize = 0;
+	struct fb_var_screeninfo vinfo;
+	struct fb_fix_screeninfo finfo;
+	// Open the file for reading and writing
+	fbfd = open("/dev/fb0", O_RDWR);
+	if (fbfd == -1) {
+		perror("Error: cannot open framebuffer device");
+		exit(1);
+	}
+	//printf("The framebuffer device was opened successfully.\n");
+	// Get fixed screen information
+	if (ioctl(fbfd, FBIOGET_FSCREENINFO, &finfo) == -1) {
+		perror("Error reading fixed information");
+		exit(2);
+	}
+	// Get variable screen information
+	if (ioctl(fbfd, FBIOGET_VSCREENINFO, &vinfo) == -1) {
+		perror("Error reading variable information");
+		exit(3);
+	}
+	//printf("%dx%d, %dbpp\n", vinfo.xres, vinfo.yres, vinfo.bits_per_pixel);
+	// Figure out the size of the screen in bytes
+	screensize = vinfo.xres * vinfo.yres * vinfo.bits_per_pixel / 8;
+	// Map the device to memory
+	fbp = malloc(screensize);
+	struct fbjar jar = {
+		.fd = fbfd,
+		.fbmem = fbp,
+		.bpp = vinfo.bits_per_pixel/8,
+		.xoff = vinfo.xoffset*vinfo.bits_per_pixel/8,
+		.yoff = vinfo.yoffset*vinfo.bits_per_pixel/8,
+		.skip = finfo.line_length,// from y to y+1
+		.screensize = screensize,
+		.rows = (screensize/finfo.line_length)-1,
+		.cols = (finfo.line_length/(vinfo.bits_per_pixel/8))-10,
+		.tty = ttyname(STDIN_FILENO),
+		.log = fopen("/tmp/buffy.log", "w")
+	};
+	return jar;
+}
+
 void CloseFb(struct fbjar jar) {
 	munmap(jar.fbmem, jar.screensize);
 	fflush(jar.log);
@@ -261,8 +306,12 @@ bool PInP(point top, point bot, point check) {
 	);
 }
 
-void SwapBuffers(struct fbjar jar, uint8* newbuff, uint8* storebuff) {;
-	if (storebuff != NULL) storebuff = jar.fbmem;
-	jar.fbmem = newbuff;
+void UpdateBuffer(struct fbjar jar, uint8* newbuff) {
+	memcpy(jar.fbmem, newbuff, jar.screensize);
 }
+
+void UpdateJar(struct fbjar jar, struct fbjar newjar) {
+	memcpy(jar.fbmem, newjar.fbmem, jar.screensize);
+}
+
 
