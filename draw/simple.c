@@ -1,5 +1,3 @@
-//TODO: DrawAllLine/Collum
-
 void SDrawAllLine (
 	struct fbjar jar, int y
 ) {
