@@ -1,10 +1,11 @@
 package main
 
-include "gutil"
 Include "termin"
+
 include "bitmap.go"
 include "bytemap.go"
 include "bytesmap.go"
+
 const (
 	FullChar = '@'
 	EmptyChar = '.'
@@ -16,8 +17,8 @@ const (
 
 func main(){
 	InitTermin()
-	bit := ReadBitMap("./tests/test.bim")
-	bit.export(Exp_C, "new.c")
+	bit := ReadBitMap("./smile.bim")
+	bit.Interact()
 
 	StopTermin()
 	exit(0)
@@ -87,11 +88,12 @@ func YorN(win *Window, text string, options ...string) (string) {
 // y/limy   x/limx
 // all/szc  byte/szc
 func DrawCoors (y, x, szc, szl int) {
+	sll:=szc*szl
 	wprint(Win, 1, 1, spf("%s%d/%d   %d/%d   ",
 		yellow, y+1,szc,   x+1,szl,
 	))
 	wprint(Win, 2, 1, spf("%s%d/%d   %d/%d   %s",
-		blue, y*szl+x,szc*szl,   (y*szl+x)/8+1,szc*szl/8, nc,
+		blue, y*szl+x+1,sll,   (y*szl+x)/8+1,sll/8, nc,
 	))
 }
 
