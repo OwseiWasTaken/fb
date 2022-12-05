@@ -6,14 +6,8 @@ void SDrawAllLine (
 	assert(CheckInJar(jar, y, 0));
 
 	uint8* location = GetFbPos(jar, y, 0);
-	int x;
 
-	//memset()
-	for (x = 0;x<jar.cols;x++) {
-		location[0 + x*jar.bpp] = 255;
-		location[1 + x*jar.bpp] = 255;
-		location[2 + x*jar.bpp] = 255;
-	}
+	memset(location, 255, jar.cols*jar.bpp);
 }
 
 void SDrawAllCollum (
