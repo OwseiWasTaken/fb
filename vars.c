@@ -314,4 +314,61 @@ void UpdateJar(struct fbjar jar, struct fbjar newjar) {
 	memcpy(jar.fbmem, newjar.fbmem, jar.screensize);
 }
 
+bool* BytesToCont(int heigth, int width, byte* Bcont) {
+	int size = heigth*width;
+	bool *bcont = malloc(size);
+	for (int i = 0; i<size/8; i++) {
+		for (int j = 0; j<8; j++ ) {
+			// i = array->byte offset, j = byte->bit offset
+			bcont[i*8+j] = (Bcont[i]&(1<<(7-j)))!=0;
+		}
+	}
+	return bcont;
+}
+
+void PutBytesInBitmap(bitmap *b, byte* Bcont) {
+	int size = b->heigth*b->width;
+	bool *bcont = malloc(size);
+	for (int i = 0; i<size/8; i++) {
+		for (int j = 0; j<8; j++ ) {
+			// i = array->byte offset, j = byte->bit offset
+			bcont[i*8+j] = (Bcont[i]&(1<<(7-j)))!=0;
+		}
+	}
+	b->cont = bcont;
+}
+
+uint8* ReadByteFb(struct fbjar jar, point top, point bot) {
+	uint8 *location = GetFbPnt(jar, top);
+	int limy = top.y - bot.y;
+	int limx = top.x - bot.x;
+	uint8* cont = malloc(limy*limx);
+	for (int i = 0; i<limy; i++) {
+		for (int j = 0; j<limx; j++) {
+			cont[i*limx+j] = (location[0]+location[1]+location[2])/3;
+			location += jar.bpp;
+		}
+		// next line
+		location -= limx*jar.bpp;
+		location += jar.skip;
+	}
+	return cont;
+}
+
+color* ReadBytesFb(struct fbjar jar, point top, point bot) {
+	uint8 *location = GetFbPnt(jar, top);
+	int limy = top.y - bot.y;
+	int limx = top.x - bot.x;
+	color* cont = malloc(limy*limx*sizeof(color));
+	for (int i = 0; i<limy; i++) {
+		for (int j = 0; j<limx; j++) {
+			cont[i*limx+j] = RGB(location[2],location[1],location[0]);
+			location += jar.bpp;
+		}
+		// next line
+		location -= limx*jar.bpp;
+		location += jar.skip;
+	}
+	return cont;
+}
 
