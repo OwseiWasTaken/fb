@@ -372,3 +372,37 @@ color* ReadBytesFb(struct fbjar jar, point top, point bot) {
 	return cont;
 }
 
+void ReadByteFbIntoBytemap(struct fbjar jar, point top, bytemap *b) {
+	uint8 *location = GetFbPnt(jar, top);
+	int limy = b->heigth;
+	int limx = b->width;
+	uint8* cont = malloc(limy*limx);
+	for (int i = 0; i<limy; i++) {
+		for (int j = 0; j<limx; j++) {
+			cont[i*limx+j] = (location[0]+location[1]+location[2])/3;
+			location += jar.bpp;
+		}
+		// next line
+		location -= limx*jar.bpp;
+		location += jar.skip;
+	}
+	b->cont = cont;
+}
+
+void ReadByteFbIntoBytesmap(struct fbjar jar, point top, bytesmap *b) {
+	uint8 *location = GetFbPnt(jar, top);
+	int limy = b->heigth;
+	int limx = b->width;
+	color* cont = malloc(limy*limx*sizeof(color));
+	for (int i = 0; i<limy; i++) {
+		for (int j = 0; j<limx; j++) {
+			cont[i*limx+j] = RGB(location[2],location[1],location[0]);
+			location += jar.bpp;
+		}
+		// next line
+		location -= limx*jar.bpp;
+		location += jar.skip;
+	}
+	b->cont = cont;
+}
+
