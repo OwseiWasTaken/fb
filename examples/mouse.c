@@ -12,18 +12,18 @@ int main(int argc, char* argv[]){
 
 	bitmap b;
 	b.heigth = 8;
-	b.width = 1;
+	b.width = 8;
 	uint8 cont[] = {
-		254,
-		192,
-		160,
-		144,
-		136,
-		132,
-		2,
-		1
+		0b11111000,
+		0b11000000,
+		0b11100000,
+		0b10110000,
+		0b10011000,
+		0b00001100,
+		0b00000110,
+		0b00000011
 	};
-	b.cont = cont;
+	PutBytesInBitmap(&b, cont);
 	color green = RGB(0,255,0);
 	point loc = MakePoint(100, 100);
 
