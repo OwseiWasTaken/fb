@@ -111,8 +111,9 @@ void CloseFb(struct fbjar jar) {
 }
 
 void StopBuffy(struct fbjar jar) {
-	CloseFb(GlobalJar);
-	if (jar.tty != NULL) {
+	if (GlobalJar.tty != NULL){
+		CloseFb(GlobalJar);
+	} else {
 		CloseFb(jar);
 	}
 }
