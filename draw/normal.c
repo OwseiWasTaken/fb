@@ -152,9 +152,9 @@ void DrawCircle (
 	for (int y = -r ; y<bot.y ; y++) {
 		for (int x = -r ; x<bot.x ; x++) {
 			if (
-					isquare(x)+isquare(y)+sr>=-r &&
-					isquare(x)+isquare(y)+sr<=r
-				) {
+				isquare(x)+isquare(y)+sr>=-r &&
+				isquare(x)+isquare(y)+sr<=r
+			) {
 				*(location + 0 + (x+r)*jar.bpp + (y+r)*jar.skip) = RGB.G;
 				*(location + 1 + (x+r)*jar.bpp + (y+r)*jar.skip) = RGB.B;
 				*(location + 2 + (x+r)*jar.bpp + (y+r)*jar.skip) = RGB.R;
