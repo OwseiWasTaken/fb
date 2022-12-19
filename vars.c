@@ -118,47 +118,6 @@ void StopBuffy(struct fbjar jar) {
 	}
 }
 
-void InitTerm ( struct fbjar jar ) {
-	struct termios term;
-	tcgetattr(STDIN_FILENO, &term);
-
-	char reconfig[36+10]; /* 36 = comamnd len, 10 = /dev/ttyNN */
-
-	fprintf(jar.log, "this tty: %s\n", jar.tty);
-	system("/bin/stty -g > /tmp/restore");
-	fprintf(jar.log, "tty config saved to '/tmp/restore'\n");
-
-	sprintf(reconfig, "/bin/stty -F %s -echo cbreak min 1", jar.tty);
-	system(reconfig);
-}
-
-void CloseTerm (struct fbjar jar) {
-	system("/bin/stty $(/bin/cat /tmp/restore)");
-	fprintf(jar.log, "\ntty config restored\n");
-	system("/bin/rm /tmp/restore");
-	fprintf(jar.log, "file '/tmp/restore' deleted\n");
-}
-
-void move(int y, int x) {
-	printf("\x1B[%d;%dH", y+1, x+1);
-}
-
-void HideCursor() {
-	puts("\x1b[?25l");
-}
-
-void ShowCursor() {
-	puts("\x1b[?25h");
-}
-
-point GetTerminalSize() {
-	struct winsize w;
-	ioctl(STDOUT_FILENO, TIOCGWINSZ, &w);
-	point p = {.y = w.ws_col, .x = w.ws_row};
-	return p;
-}
-
-
 point MakePoint(int y, int x) {
 	point p = {.y = y, .x = x};
 	return p;
@@ -167,19 +126,6 @@ point MakePoint(int y, int x) {
 polar MakePolar(float r, float a) {
 	polar p = {.r = r, .a = a};
 	return p;
-}
-
-// ANSII (text) rgb
-// only use while chars aren't implemented
-char* TRGB(uint8 R, uint8 G, uint8 B) {
-	char* buff = malloc(21);
-	sprintf(buff, "\x1b[38;2;%d;%d;%dm", R, G, B);
-	return buff;
-}
-
-color RGB(uint8 R, uint8 G, uint8 B) {
-	color c = {.R = R, .G = G, .B = B};
-	return c;
 }
 
 long int GetPixelPos ( struct fbjar jar, int y, int x ) {
@@ -220,14 +166,6 @@ bool CheckInJar (struct fbjar jar, int y, int x) {
 	return true;
 }
 
-int ipow(int base, int power) {
-	return (int)pow((double)base, (double)power);
-}
-
-int isquare (int base) {
-	return ipow(base, 2);
-}
-
 ppoint PolarToCoord (polar plr) {
 	ppoint pnt;
 	float a = plr.a*(PI/180);
@@ -242,42 +180,6 @@ point SPolarToCoord (polar plr) {
 	pnt.x = plr.r*cos(a);
 	pnt.y = plr.r*sin(a);
 	return pnt;
-}
-
-fmttime FmtTime(time_t rn, int UTF) {
-	fmttime now;
-
-	char* timetext = ctime(&rn);
-	now.weekday[0] = timetext[0];
-	now.weekday[1] = timetext[1];
-	now.weekday[2] = timetext[2];
-	now.weekday[4] = '\0';
-
-	now.month[0] = timetext[4];
-	now.month[1] = timetext[5];
-	now.month[2] = timetext[6];
-	now.month[3] = '\0';
-
-	now.minute = (rn%(60*60))/60;
-	now.seccond= rn%60;
-	now.year = 1970+(int)(rn/(24.0*3600.0)/365.25);
-	now.hour = rn/3600%24+(UTF);
-	if (now.hour < 1) {
-		now.hour = 24+now.hour;
-	}
-
-	now.day = timetext[9]-'0';
-	if (timetext[8] != ' ') {
-		now.day += 10*(timetext[8]-'0');
-	};
-	return now;
-}
-
-char* FmtTimeToString(fmttime now) {
-	char* buff = malloc(38);
-	sprintf(buff, "s:%d\nm:%d\nh:%d\nd:%d\ny:%d\n\nM:%s\nW:%s",
-		now.seccond, now.minute, now.hour, now.day, now.year, now.month, now.weekday);
-	return buff;
 }
 
 void SHandleInt( int sig ) {
@@ -311,8 +213,8 @@ void UpdateBuffer(struct fbjar jar, uint8* newbuff) {
 	memcpy(jar.fbmem, newbuff, jar.screensize);
 }
 
-void UpdateJar(struct fbjar jar, struct fbjar newjar) {
-	memcpy(jar.fbmem, newjar.fbmem, jar.screensize);
+void UpdateJar(struct fbjar * restrict jar, struct fbjar * restrict newjar) {
+	memcpy(jar->fbmem, newjar->fbmem, jar->screensize);
 }
 
 bool* BytesToCont(int heigth, int width, byte* Bcont) {
