@@ -123,7 +123,7 @@ int main ( int argc, char** argv ) {
 				}
 			} else {
 				time(&rn);
-				now = FmtTime(rn);
+				now = FmtTime(rn, UTFDIFF);
 			}
 
 			/* reset pointers */{
