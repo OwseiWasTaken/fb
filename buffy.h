@@ -1,6 +1,8 @@
 #ifndef BUFFY
 #define BUFFY
 
+// cUtil https://github.com/owseiwastaken/cutil
+#include "cutil.h"
 // fb
 #include <sys/types.h>
 #include <sys/ioctl.h>
@@ -20,14 +22,6 @@
 #include <assert.h>
 #include <fcntl.h>
 
-
-// simple defs
-typedef unsigned int uint;
-typedef unsigned char uint8;
-typedef unsigned char byte;
-typedef char int8;
-
-#define PI 3.141592
 // written char heigth in pixels
 #define CHARLEN 16
 // written char width in pixels
@@ -51,28 +45,9 @@ struct fbjar {
 	char* tty;
 };
 
-// intensity and color
-typedef struct {
-	uint8 R, G, B;
-} color;
-
-typedef struct {
-	int y, x;
-} point;
-
-typedef struct {
-	float y, x;
-} ppoint;
-
 typedef struct {
 	float a, r;
 } polar;
-
-typedef struct {
-	int year, day, hour, minute, seccond;
-	char weekday[4];
-	char month[4];
-} fmttime;
 
 // one byte for 8 pixels
 // one bit for each
