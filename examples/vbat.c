@@ -10,6 +10,17 @@ typedef struct {
 	byte level;
 } battery;
 
+// move to cutil
+ssize_t FindIndex(void *arr, ssize_t arrsize, byte cmp) {
+	ssize_t i = 0;
+	for (; i<arrsize; i++) {
+		if (((byte*)arr)[i] == cmp) break;
+	}
+	if (i == arrsize) {return -1;}
+	return i;
+}
+
+// move to cutil
 // count lineFeeds
 int CountLF(char *lines) {
 	int ret = 0;
@@ -19,6 +30,7 @@ int CountLF(char *lines) {
 	return ret;
 }
 
+// move to cutil
 int LineLen(char* line) {
 	int ret;
 	for (ret = 0; line[ret] != '\n'; ret++);
@@ -63,16 +75,16 @@ void _Print_Bat(battery b) {
 	printf("%i:%hhu%%\n", b.id, b.level);
 }
 
-void DrawBat(struct fbjar jar, int bat) {
-	int padding = 2;
-	int ylen = 30;
-	int xlen = 100;
-	int yoff = 30;
-	int xoff = 30;
-	point tp = MakePoint(yoff, xlen+xoff-bat);
-	point btop = MakePoint(yoff-padding-1, xoff-padding);
-	point bt = MakePoint(ylen+yoff,xlen+xoff);
-	point bbot = MovePoint(bt, padding, padding);
+void DrawBat(struct fbjar jar, int bat, int pad, point top, point len, color *colover) {
+	// map bat level into len.x
+	//int padding = 2;
+	//float ratio = (float)len.x / (float)bat;
+	float ratio = 100/(float)len.x;
+	int lvl = (int)((float)bat/ratio);
+	point tp = MovePoint(top, 0, len.x-lvl);
+	point bt = MakePoint(len.y+top.y,len.x+top.x);
+	point btop = MakePoint(top.y-pad-1, top.x-pad);
+	point bbot = MovePoint(bt, pad, pad);
 
 	color ener = RGB(0,255,0);
 	if ( bat < 30 ) {
@@ -80,13 +92,15 @@ void DrawBat(struct fbjar jar, int bat) {
 	} else if (bat >= 95) {
 		ener = RGB(255,255,255);
 	}
+	if (colover != NULL) {
+		ener = *colover;
+	}
 
 	DrawRectangle(jar, btop, bbot, RGB(255,255,255));
 	FillRectangle(jar, tp, bt, ener);
 }
 
-int main(int argc, char* argv[]) {
-	// get info
+int GetAvgBat() { // get info and store avg batt% in alllvl
 	system("/bin/acpi -b > /tmp/acpiOut");
 	FILE *rd = fopen("/tmp/acpiOut", "r");
 	long unsigned bsz = 0xA000; // 40kb
@@ -103,34 +117,99 @@ int main(int argc, char* argv[]) {
 	}
 	AcpiInfo-=(offset+1);
 	assert(offset < bsz);
-
 	int ilns = CountLF(AcpiInfo);
 	char *lines[ilns];
 	battery batts[ilns];
-	int alllvl = 0;
-	int mean = 0;
 
-	SplitLines(lines, AcpiInfo);
+	int alllvl = 0;
+	int count = 0;
+
+	SplitLines(lines, AcpiInfo); // !mallocs lines
+	free(AcpiInfo);
 	for (int i=0; i<ilns; i++) {
 		batts[i] = ProcLine(lines[i]);
+		free(lines[i]);
 		if (batts[i].level) {
 			alllvl+=batts[i].level;
-			mean++;
+			count++;
 		}
 	}
-	alllvl = alllvl/mean;
-	// get avg batt level
+	return alllvl/count;
+}
+
+int main(int argc, char* argv[]) {
+	int BatLvl = GetAvgBat();
 
 	// show info
-	
 	struct fbjar jar = InitBuffy();
-	if (argc-1) {
-		for (int i = 0; i<100; i++) {
-			DrawBat(jar, i);
-			usleep(30000);
+
+	bool animate = false;
+	bool loop = false;
+	int pad = 2;
+	point top = MakePoint(30,30);
+	point len = MakePoint(30, 100);
+
+	for (int i = 0 ; i<argc ; i++) {
+		if (!strcmp(argv[i], "-a")) {
+			animate = true;
+		} else if (!strcmp(argv[i], "-p")) {
+			i++;
+			assert(i!=argc);
+			pad = atoi(argv[i]);
+			assert(!(pad == 0 && !(argv[i][0] == '0')));
+		} else if (!strcmp(argv[i], "-t")) {
+			i++;
+			assert(i!=argc);
+			ssize_t split = FindIndex(argv[i], strlen(argv[i]), ',');
+			assert(split != -1);
+			argv[i][split] = '\0';
+			int y = atoi(argv[i]);
+			int x = atoi(argv[i]+split+1);
+			assert(!(y == 0 && !(argv[i][0] == '0')));
+			assert(!(x == 0 && !(argv[i][split+1] == '0')));
+			top = MakePoint(y, x);
+		} else if (!strcmp(argv[i], "-l")) {
+			i++;
+			assert(i!=argc);
+			ssize_t split = FindIndex(argv[i], strlen(argv[i]), ',');
+			assert(split != -1);
+			argv[i][split] = '\0';
+			int y = atoi(argv[i]);
+			int x = atoi(argv[i]+split+1);
+			assert(!(y == 0 && !(argv[i][0] == '0')));
+			assert(!(x == 0 && !(argv[i][split+1] == '0')));
+			len = MakePoint(y, x);
+		} else if (!strcmp(argv[i], "--loop")) {
+			loop = true;
+		}
+	}
+	assert(top.y-pad > 0);
+	assert(top.x-pad > 0);
+	if (!loop) {
+		if (animate) {
+			for (int i = 0; i<101; i++) {
+				DrawBat(jar, i, pad, top, len, NULL);
+				usleep(30000);
+			}
+		} else {
+			DrawBat(jar, BatLvl, pad, top, len, NULL);
 		}
 	} else {
-		DrawBat(jar, alllvl);
+		while (true) {
+			color clear = RGB(0,0,0);
+			color charging = RGB(80,200,80);
+			// for charing animation
+			if (animate) {
+				for (int i = 0; i<11; i++) {
+					DrawBat(jar, i*10-1, pad, top, len, &charging);
+					usleep(909090); // 9/10 sec
+				}
+				DrawBat(jar, 100, pad, top, len, &clear);
+			} else {
+				DrawBat(jar, BatLvl, pad, top, len, NULL);
+				usleep(1000000); // 1 sec
+			}
+		}
 	}
 
 	StopBuffy(jar);
