@@ -152,6 +152,8 @@ int main(int argc, char* argv[]) {
 	for (int i = 0 ; i<argc ; i++) {
 		if (!strcmp(argv[i], "-a")) {
 			animate = true;
+		else if (!strcmp(argv[i], "--animate")) {
+			animate = true;
 		} else if (!strcmp(argv[i], "-p")) {
 			i++;
 			assert(i!=argc);
@@ -186,32 +188,22 @@ int main(int argc, char* argv[]) {
 	assert(top.y-pad > 0);
 	assert(top.x-pad > 0);
 	int BatLvl = GetAvgBat();
-	if (!loop) {
+	DrawBat(jar, BatLvl, pad, top, len, NULL);
+	while (loop) {
+		color clear = RGB(0,0,0);
+		color charging = RGB(80,200,80);
+		// for charing animation
 		if (animate) {
-			for (int i = 0; i<101; i++) {
-				DrawBat(jar, i, pad, top, len, NULL);
-				usleep(30000);
+			for (int i = 0; i<11; i++) {
+				DrawBat(jar, i*10-1, pad, top, len, &charging);
+				usleep(909090); // 10/11 sec
 			}
+			DrawBat(jar, 100, pad, top, len, &clear);
 		} else {
 			DrawBat(jar, BatLvl, pad, top, len, NULL);
+			sleep(1);
 		}
-	} else {
-		while (true) {
-			color clear = RGB(0,0,0);
-			color charging = RGB(80,200,80);
-			// for charing animation
-			if (animate) {
-				for (int i = 0; i<11; i++) {
-					DrawBat(jar, i*10-1, pad, top, len, &charging);
-					usleep(909090); // 10/11 sec
-				}
-				DrawBat(jar, 100, pad, top, len, &clear);
-			} else {
-				DrawBat(jar, BatLvl, pad, top, len, NULL);
-				sleep(1);
-			}
-			BatLvl = GetAvgBat();
-		}
+		BatLvl = GetAvgBat();
 	}
 
 	StopBuffy(jar);
