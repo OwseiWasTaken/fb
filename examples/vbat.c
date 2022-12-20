@@ -152,7 +152,7 @@ int main(int argc, char* argv[]) {
 	for (int i = 0 ; i<argc ; i++) {
 		if (!strcmp(argv[i], "-a")) {
 			animate = true;
-		else if (!strcmp(argv[i], "--animate")) {
+		} else if (!strcmp(argv[i], "--animate")) {
 			animate = true;
 		} else if (!strcmp(argv[i], "-p")) {
 			i++;
@@ -185,6 +185,7 @@ int main(int argc, char* argv[]) {
 			loop = true;
 		}
 	}
+
 	assert(top.y-pad > 0);
 	assert(top.x-pad > 0);
 	int BatLvl = GetAvgBat();
@@ -201,7 +202,7 @@ int main(int argc, char* argv[]) {
 			DrawBat(jar, 100, pad, top, len, &clear);
 		} else {
 			DrawBat(jar, BatLvl, pad, top, len, NULL);
-			sleep(1);
+			sleep(6);
 		}
 		BatLvl = GetAvgBat();
 	}
