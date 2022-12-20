@@ -69,8 +69,8 @@ void DrawBat(struct fbjar jar, int bat) {
 	int xlen = 100;
 	int yoff = 30;
 	int xoff = 30;
+	point tp = MakePoint(yoff, xlen+xoff-bat);
 	point btop = MakePoint(yoff-padding-1, xoff-padding);
-	point tp = MakePoint(xoff, xlen+xoff-bat);
 	point bt = MakePoint(ylen+yoff,xlen+xoff);
 	point bbot = MovePoint(bt, padding, padding);
 
