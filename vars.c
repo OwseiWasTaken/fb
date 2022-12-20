@@ -118,12 +118,17 @@ void StopBuffy(struct fbjar jar) {
 	}
 }
 
-point MakePoint(int y, int x) {
+point MakePoint(const int y, const int x) {
 	point p = {.y = y, .x = x};
 	return p;
 }
 
-polar MakePolar(float r, float a) {
+point MovePoint(const point p, const int y, const int x) {
+	point r = {.y = p.y+y, .x = p.x+x};
+	return r;
+}
+
+polar MakePolar(const float r, const float a) {
 	polar p = {.r = r, .a = a};
 	return p;
 }
