@@ -10,44 +10,43 @@ int main ( int argc, char** argv ) {
 	int MaxR = 250;
 	int y = jar.rows/2-MaxR;
 	int x = jar.cols/2-MaxR;
-	/* parse args */{
-		for (int i = 0 ; i<argc ; i++) {
-			if (argv[i][0] == '-') {
-				if (!strcmp(argv[i], "--debug")) {
-					debug = true;
-				} else if (!strcmp(argv[i], "--digital")) {
-					digital = true;
-				} else if (!strcmp(argv[i], "-d")) {
-					digital = true;
-				} else if (!strcmp(argv[i], "-r")) {
-					i++;
-					assert(i < argc); // read radius size
-					MaxR = atoi(argv[i]);
-					if (MaxR == 0 && !(argv[i][0] == '0')) {
-						assert(0);//can't parse -r input
-					}
-				} else if (!strcmp(argv[i], "-y")) {
-					i++;
-					assert(i < argc); // read radius size
-					y = atoi(argv[i]);
-					if (y == 0 && (argv[i][0] == 'm')) {
-						y = jar.rows-2*MaxR-1;
-					} else if (y == 0 && !(argv[i][0] == '0')) {
-						assert(0);//can't parse -r input
-					}
-				} else if (!strcmp(argv[i], "-x")) {
-					i++;
-					assert(i < argc); // read radius size
-					x = atoi(argv[i]);
-					if (x == 0 && (argv[i][0] == 'm')) {
-						x = jar.cols-2*MaxR-1;
-					} else if (x == 0 && !(argv[i][0] == '0')) {
-						assert(0);//can't parse -r input
-					}
-				}
+	/* parse args */
+	for (int i = 0 ; i<argc ; i++) {
+		if (!strcmp(argv[i], "--debug")) {
+			debug = true;
+		} else if (!strcmp(argv[i], "--digital")) {
+			digital = true;
+		} else if (!strcmp(argv[i], "-d")) {
+			digital = true;
+		} else if (!strcmp(argv[i], "-r")) {
+			i++;
+			assert(i < argc); // read radius size
+			MaxR = atoi(argv[i]);
+			assert(!(MaxR == 0 && !(argv[i][0] == '0')));
+			//if (MaxR == 0 && !(argv[i][0] == '0')) {
+			//	assert(0);//can't parse -r input
+			//}
+		} else if (!strcmp(argv[i], "-y")) {
+			i++;
+			assert(i < argc); // read radius size
+			y = atoi(argv[i]);
+			if (y == 0 && (argv[i][0] == 'm')) {
+				y = jar.rows-2*MaxR-1;
+			} else if (y == 0 && !(argv[i][0] == '0')) {
+				assert(0);//can't parse -r input
+			}
+		} else if (!strcmp(argv[i], "-x")) {
+			i++;
+			assert(i < argc); // read radius size
+			x = atoi(argv[i]);
+			if (x == 0 && (argv[i][0] == 'm')) {
+				x = jar.cols-2*MaxR-1;
+			} else if (x == 0 && !(argv[i][0] == '0')) {
+				assert(0);//can't parse -r input
 			}
 		}
 	}
+	
 	HideCursor();
 	x+=MaxR;
 	y+=MaxR;
