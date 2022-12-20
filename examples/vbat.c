@@ -138,7 +138,6 @@ int GetAvgBat() { // get info and store avg batt% in alllvl
 }
 
 int main(int argc, char* argv[]) {
-	int BatLvl = GetAvgBat();
 
 	// show info
 	struct fbjar jar = InitBuffy();
@@ -185,6 +184,7 @@ int main(int argc, char* argv[]) {
 	}
 	assert(top.y-pad > 0);
 	assert(top.x-pad > 0);
+	int BatLvl = GetAvgBat();
 	if (!loop) {
 		if (animate) {
 			for (int i = 0; i<101; i++) {
@@ -209,6 +209,7 @@ int main(int argc, char* argv[]) {
 				DrawBat(jar, BatLvl, pad, top, len, NULL);
 				usleep(1000000); // 1 sec
 			}
+			BatLvl = GetAvgBat();
 		}
 	}
 
