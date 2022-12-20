@@ -115,6 +115,7 @@ int GetAvgBat() { // get info and store avg batt% in alllvl
 			offset += lo;
 		}
 	}
+	fclose(rd);
 	AcpiInfo-=(offset+1);
 	assert(offset < bsz);
 	int ilns = CountLF(AcpiInfo);
@@ -202,12 +203,12 @@ int main(int argc, char* argv[]) {
 			if (animate) {
 				for (int i = 0; i<11; i++) {
 					DrawBat(jar, i*10-1, pad, top, len, &charging);
-					usleep(909090); // 9/10 sec
+					usleep(909090); // 10/11 sec
 				}
 				DrawBat(jar, 100, pad, top, len, &clear);
 			} else {
 				DrawBat(jar, BatLvl, pad, top, len, NULL);
-				usleep(1000000); // 1 sec
+				sleep(1);
 			}
 			BatLvl = GetAvgBat();
 		}
