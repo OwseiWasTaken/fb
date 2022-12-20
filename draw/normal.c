@@ -107,15 +107,17 @@ void FillRectangle (
 	point top, point bot,
 	color RGB
 ) {
+	assert(CheckPIJ(jar, top));
+	assert(CheckPIJ(jar, bot));
 	uint8* location = GetFbPos(jar, top.y, top.x);
-	int limy = (top.y-bot.y)*jar.skip;
-	int limx = (top.x-bot.x)*jar.bpp;
+	int limy = bot.y-top.y;
+	int limx = bot.x-top.x;
 
-	for (int i = top.y; i < limy ; i+=jar.skip ) {
-		for (int j = top.x; j < limx ; j+=jar.bpp ) {
-			*(location + 0 + j + i) = RGB.B;
-			*(location + 1 + j + i) = RGB.G;
-			*(location + 2 + j + i) = RGB.R;
+	for (int i = 0; i < limy ; i++ ) {
+		for (int j = 0; j < limx ; j++ ) {
+			location[0 + j*jar.bpp + i*jar.skip] = RGB.B;
+			location[1 + j*jar.bpp + i*jar.skip] = RGB.G;
+			location[2 + j*jar.bpp + i*jar.skip] = RGB.R;
 		}
 	}
 }
