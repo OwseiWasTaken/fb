@@ -2,8 +2,12 @@ type bitmap struct {
 	filename string
 	cont []bool
 	btcont []byte
-	width int
 	height int
+	width int
+}
+
+func MakeBitMap(filename string, h, w int) (bitmap) {
+	return bitmap{filename+"bim", make([]bool, h*w), make([]byte, h*w/8), h, w}
 }
 
 //////////////////////////
@@ -46,41 +50,44 @@ func ReadBitMap(filename string) (bitmap) {
 			c[i*8+j] = bflcont[off+i]&(1<<(7-j%8))!=0
 		}
 	}
-	return bitmap{filename, c, bt, w, h}
+	ret := MakeBitMap(filename, h, w)
+	ret.cont = c
+	ret.btcont = bt
+	return ret
 }
 
 func (b bitmap) save () {
 	var (
-		szh = byte(b.height/255+1)
+		szh = b.height/255+1
 		h = UnparseBInt(b.height)
-		szw = byte(b.width/255+1)
+		szw = b.width/255+1
 		w = UnparseBInt(b.width/8)
 		// TODO: compact bool cont -> byte cont to save
 		c = b.btcont
 		lb = len(b.btcont)
 		//c = len(b.cont)
-		out = make([]byte, byte(lb)+szh+szw+2)
+		out = make([]byte, lb+int(szh+szw)+2)
 		off int
-		i byte
+		i int
 	)
 
-	out[off] = szh
+	out[off] = byte(szh)
 	off++
 	for i=0;i<szh;i++ {
 		out[off] = h[i]
 		off++
 	}
 
-	out[off] = szw
+	out[off] = byte(szw)
 	off++
 	for i=0;i<szw;i++ {
 		out[off] = w[i]
 		off++
 	}
 
-	for j:=0; j<lb; j++ {;
+	for i:=0; i<lb; i++ {;
 		//printf("%d -> %d\n", j, lb)
-		out[off] = c[j]
+		out[off] = c[i]
 		off++
 	}
 
@@ -128,6 +135,7 @@ func (b bitmap) export (tp int, filename string) {
 }
 
 func (b *bitmap) Expand (y, x int) {
+	if (y < 0 || x < 0) {die("can't expand bitmap by negative numbers")}
 	var nh = b.height+y
 	var nw = b.width+x
 	var ncont = make([]bool, (nh)*(nw))
@@ -152,10 +160,10 @@ func (b bitmap) Draw (yoff, xoff int) {
 		wmove(Win, i+yoff, xoff)
 		for j:=0; j<b.width; j++ {
 			if (b.cont[i*b.width+j]) {
-				wPut(Win, FullChar)
+				wput(Win, FullChar)
 				//wprint(Win, i+yoff, j+xoff, spf("%c", FullChar))
 			} else {
-				wPut(Win, EmptyChar)
+				wput(Win, EmptyChar)
 				//wprint(Win, i+yoff, j+xoff, spf("%c", EmptyChar))
 			}
 		}
@@ -234,14 +242,14 @@ func (bit bitmap) Interact () {
 			clear()
 			wprint(Win, 0, 0, spf("current height: %d\n", bit.height))
 			wmove(Win, 1, 0)
-			wFlush(Win)
+			wflush(Win)
 
 			addy:=GetInt("y>")
 
 			clear()
 			wprint(Win, 0, 0, spf("current width: %d\n", bit.width))
 			wmove(Win, 1, 0)
-			wFlush(Win)
+			wflush(Win)
 
 			addx:=GetInt("x>")
 
@@ -255,7 +263,7 @@ func (bit bitmap) Interact () {
 			clear()
 			wprint(Win, 0, 0, spf("current name: %s\n", bit.filename))
 			wmove(Win, 1, 0)
-			wFlush(Win)
+			wflush(Win)
 			name:=oldinput(">")
 			bit.filename = name
 
