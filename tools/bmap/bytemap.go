@@ -170,8 +170,7 @@ func (byt bytemap) Interact () {
 		pencils = make([]uint8, 8)
 		pencil uint8 = 255
 		penindex = 0
-		//menu = MakeWin("Menu", stdout, stdin, 2, 2+15, 2, 2+50)
-		//DelAll = false
+		menu = MakeWin("Save Menu", stdout, stdin, 1, 1+15, 2, 2+50)
 		PencilMode = -1 // -1 = off, 0 = space, 1 = on
 	)
 	for i:=range pencils {
@@ -181,6 +180,7 @@ func (byt bytemap) Interact () {
 
 	Win.name = spf("bytemap editor [%s]", byt.filename)
 
+	// master draw cycle
 	wDrawBorderName(Win, '#')
 	byt.Draw(yoff, xoff)
 	ByteDrawPencil(pencil, PencilMode, penindex)
@@ -254,6 +254,38 @@ func (byt bytemap) Interact () {
 			byt.Expand(addy,addx)
 			limy = byt.height; limx = byt.width
 
+			clear()
+			wDrawBorderName(Win, '#')
+			byt.Draw(yoff, xoff)
+			ByteDrawPencil(pencil, PencilMode, penindex)
+		case "r":
+			clear()
+			wprint(Win, 0, 0, spf("current name: %s\n", byt.filename))
+			wmove(Win, 1, 0)
+			wflush(Win)
+			name:=oldinput(">")
+			byt.filename = name
+
+			Win.name = spf("bytemap editor [%s]", byt.filename)
+
+			wDrawBorderName(Win, '#')
+			byt.Draw(yoff, xoff)
+			ByteDrawPencil(pencil, PencilMode, penindex)
+		case "f9":
+			clear()
+			wDrawBorderName(Win, '#')
+			wDrawBorderName(menu, '#')
+			wprint(menu, 2, 2, spf("file: %s", byt.filename))
+			wprint(menu, 3, 2, spf("%d bytes to save*", byt.width*byt.height+4))
+			// *doesn't account width/height can be bigger than 255
+			answ := YorN(menu, "Save/Quit",
+				"Save & Quit", "Save",
+				"Quit", "Don't save",
+			)
+			if answ[0] == 'S' {
+				byt.save()
+			}
+			if answ[len(answ)-1] == 't' { return }
 			clear()
 			wDrawBorderName(Win, '#')
 			byt.Draw(yoff, xoff)
