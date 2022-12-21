@@ -112,11 +112,11 @@ func (b *bytemap) Expand (y, x int) {
 //////////////////////////
 
 func ByteDrawCoords (y, x, szc, szl int) {
-	wprint(Win, 0, 0, spf("%s%d/%d   %d/%d   ",
+	wprint(Win, 1, 1, spf("%s%d/%d   %d/%d      ",
 		yellow, y+1,szc,   x+1,szl,
 	))
-	wprint(Win, 1, 0, spf("%s%o/%o   %d/%d   %s",
-		blue, y*szl+x,(szc)*(szl-1)+1,   (y*szl+x),szc*szl, nc,
+	wwrite(Win, spf("%s%d/%d%s    ",
+		blue, y*szl+x+1,szc*szl, nc,
 	))
 }
 
@@ -124,10 +124,141 @@ func (b bytemap) Draw (yoff, xoff int) {
 	for i:=0; i<b.height; i++ {
 		wmove(Win, i+yoff, xoff)
 		for j:=0; j<b.width; j++ {
-			wwrite(Win, RGB(b.cont[i*b.width+j],b.cont[i*b.width+j],b.cont[i*b.width+j])+sFullChar)
+			if (b.cont[i*b.width+j] == 0) {
+				wwrite(Win, RGB(10,10,10)+sEmptyChar)
+			} else {
+				wwrite(Win, RGB(b.cont[i*b.width+j],b.cont[i*b.width+j],b.cont[i*b.width+j])+sFullChar)
+			}
+		}
+	}
+	wwrite(Win, RGB(255,255,255))
+}
+
+func ByteDrawPencil (pencil uint8, PutAll int, index int) {
+	var prgb = RGB(pencil, pencil, pencil)
+	if (pencil < 10) {
+		prgb = RGB(10,10,10)
+	}
+	wprint(Win, 2, 1, spf("pencil:%d: %s%d%s  %s        ", // 9 spaces cuz case "e"
+		index, prgb, pencil, nc,
+		[]string{"OFF", "SPACE", "ON"}[PutAll+1],
+	))
+}
+
+func (b bytemap) DByte (yoff, xoff, y, x int) {
+	wmove(Win, y+yoff, x+xoff)
+	if (b.cont[y*b.width+x] == 0) {
+		wwrite(Win, RGB(10,10,10)+sEmptyChar)
+	} else {
+		wwrite(Win,
+			RGB(
+				b.cont[y*b.width+x],
+				b.cont[y*b.width+x],
+				b.cont[y*b.width+x],
+			)+sFullChar)
+	}
+	wwrite(Win, RGB(255,255,255))
+}
+
+func (byt bytemap) Interact () {
+	var (
+		k string
+		y, x int
+		limy = byt.height; limx = byt.width
+		yoff = 3
+		xoff = 3
+		pencils = make([]uint8, 8)
+		pencil uint8 = 255
+		penindex = 0
+		//menu = MakeWin("Menu", stdout, stdin, 2, 2+15, 2, 2+50)
+		//DelAll = false
+		PencilMode = -1 // -1 = off, 0 = space, 1 = on
+	)
+	for i:=range pencils {
+		pencils[i] = 0
+	}
+	pencils[penindex] = pencil
+
+	Win.name = spf("bytemap editor [%s]", byt.filename)
+
+	wDrawBorderName(Win, '#')
+	byt.Draw(yoff, xoff)
+	ByteDrawPencil(pencil, PencilMode, penindex)
+
+	for {
+		if (PencilMode == 1) { byt.cont[y*byt.width+x] = pencil }
+		ByteDrawCoords(y, x, byt.height, byt.width)
+		byt.DByte(yoff, xoff, y, x)
+		wmove(Win, yoff+y, xoff+x)
+		k = wgtk(Win)
+		switch (k) {
+		case "up", "k":
+			y = (y+limy-1)%limy
+		case "down", "j":
+			y = (y+1)%limy
+		case "left", "h":
+			x = (x+limx-1)%limx
+		case "right", "l":
+			x = (x+1)%limx
+		case "e": // edit pecil
+			wmove(Win, 2, 1)
+			wflush(Win)
+			pencil = uint8(GetInt("set pencil intencity>"))
+			clear()
+			wDrawBorderName(Win, '#')
+			byt.Draw(yoff, xoff)
+			pencils[penindex] = pencil
+			ByteDrawPencil(pencil, PencilMode, penindex)
+		case "p":
+			if (PencilMode == 0) {
+				PencilMode = 1
+			} else {
+				PencilMode = PencilMode*-1
+			}
+			ByteDrawPencil(pencil, PencilMode, penindex)
+		case "P":
+			PencilMode = 0
+			ByteDrawPencil(pencil, PencilMode, penindex)
+		case "c":
+			penindex = (penindex+1)%8
+			pencil = pencils[penindex]
+			ByteDrawPencil(pencil, PencilMode, penindex)
+		case "C":
+			penindex = (penindex+7)%8
+			pencil = pencils[penindex]
+			ByteDrawPencil(pencil, PencilMode, penindex)
+		case "space":
+			if (PencilMode==0) {
+				byt.cont[y*byt.width+x] = pencil
+			} else {
+				byt.cont[y*byt.width+x] = 255-byt.cont[y*byt.width+x]
+			}
+		case "n":
+			clear()
+			wprint(Win, 0, 0, spf("current height: %d\n", byt.height))
+			wmove(Win, 1, 0)
+			wflush(Win)
+
+			addy:=GetInt("y>")
+
+			clear()
+			wprint(Win, 0, 0, spf("current width: %d\n", byt.width))
+			wmove(Win, 1, 0)
+			wflush(Win)
+
+			addx:=GetInt("x>")
+
+			wDrawLine(Win, yoff-1, ' ')
+			wDrawBorderName(Win, '#')
+
+			byt.Expand(addy,addx)
+			limy = byt.height; limx = byt.width
+
+			clear()
+			wDrawBorderName(Win, '#')
+			byt.Draw(yoff, xoff)
+			ByteDrawPencil(pencil, PencilMode, penindex)
 		}
 	}
 }
-
-func (b bytemap) Interact () { }
 
