@@ -9,6 +9,8 @@ include "bytesmap.go"
 const (
 	FullChar = '@'
 	EmptyChar = '.'
+	sFullChar = "@"
+	sEmptyChar = "."
 	nc = "\x1b[38;2;255;255;255m"
 	yellow = "\x1b[38;2;255;255;0m"
 	blue = "\x1b[38;2;0;0;255m"
@@ -17,8 +19,6 @@ const (
 
 func main(){
 	InitTermin()
-	bit := ReadBitMap("./smile.bim")
-	bit.Interact()
 
 	StopTermin()
 	exit(0)
@@ -61,9 +61,9 @@ func YorN(win *Window, text string, options ...string) (string) {
 		wmove(win, win.LenY-2, 3)
 		for i:=0; i<lo; i++ {
 			if i != x {
-				wWrite(win, spf("%s  ", options[i]))
+				wwrite(win, spf("%s  ", options[i]))
 			} else {
-				wWrite(win, spf("%s%s%s  ", blue, options[i], nc))
+				wwrite(win, spf("%s%s%s  ", blue, options[i], nc))
 			}
 		}
 		wmove(win, win.LenY-2, 3+ats[x])
