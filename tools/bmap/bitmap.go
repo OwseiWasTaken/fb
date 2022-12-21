@@ -187,7 +187,6 @@ func (bit bitmap) Interact () {
 		offy = 4
 		offx = 3
 		menu = MakeWin("Menu", stdout, stdin, 2, 2+15, 2, 2+50)
-		answ string
 		DelAll = false
 		PutAll = false
 	)
@@ -205,13 +204,13 @@ func (bit bitmap) Interact () {
 		wmove(Win, offy+y, offx+x)
 		k = wgtk(Win)
 		switch (k) {
-		case "up":
+		case "up", "k":
 			y = (y+limy-1)%limy
-		case "down":
+		case "down", "j":
 			y = (y+1)%limy
-		case "left":
+		case "left", "h":
 			x = (x+limx-1)%limx
-		case "right":
+		case "right", "l":
 			x = (x+1)%limx
 		case "space":
 			bit.cont[y*bit.width+x] = !bit.cont[y*bit.width+x]
@@ -276,7 +275,7 @@ func (bit bitmap) Interact () {
 			wDrawBorderName(menu, '#')
 			wprint(menu, 2, 2, spf("file: %s", bit.filename))
 			wprint(menu, 3, 2, spf("%d bytes to save", bit.width*bit.height/8))
-			answ = YorN(menu, "Save?", "Yes", "No")
+			answ := YorN(menu, "Save?", "Yes", "No")
 			if answ == "Yes" {
 				bit.save()
 				return
