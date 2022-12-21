@@ -170,7 +170,7 @@ func (b bitmap) Draw (yoff, xoff int) {
 	}
 }
 
-func BitDrawCoors (y, x, szc, szl int) {
+func BitDrawCoords (y, x, szc, szl int) {
 	wprint(Win, 0, 0, spf("%s%d/%d   %d/%d   ",
 		yellow, y+1,szc,   x+1,szl,
 	))
@@ -200,7 +200,7 @@ func (bit bitmap) Interact () {
 			bit.cont[y*bit.width+x] = true
 		}
 
-		DrawCoors(y, x, bit.height, bit.width)
+		DrawCoords(y, x, bit.height, bit.width)
 		bit.Draw(offy, offx)
 		wmove(Win, offy+y, offx+x)
 		k = wgtk(Win)

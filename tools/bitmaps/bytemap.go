@@ -111,7 +111,7 @@ func (b *bytemap) Expand (y, x int) {
 ////////// front /////////
 //////////////////////////
 
-func ByteDrawCoors (y, x, szc, szl int) {
+func ByteDrawCoords (y, x, szc, szl int) {
 	wprint(Win, 0, 0, spf("%s%d/%d   %d/%d   ",
 		yellow, y+1,szc,   x+1,szl,
 	))

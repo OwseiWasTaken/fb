@@ -24,7 +24,7 @@ func main(){
 	exit(0)
 }
 
-// n, offset
+// bytes -> int
 func ParseBInt(len int, bts []int) (int) {
 	var x int = 0
 	var i int
@@ -34,6 +34,7 @@ func ParseBInt(len int, bts []int) (int) {
 	return x
 }
 
+// int -> bytes
 func UnparseBInt(v int) ([]byte) {
 	var ret []byte
 	var xc byte = 255
@@ -44,6 +45,7 @@ func UnparseBInt(v int) ([]byte) {
 	return ret[1:]
 }
 
+// select box
 func YorN(win *Window, text string, options ...string) (string) {
 	var (
 		k string
@@ -85,9 +87,10 @@ func YorN(win *Window, text string, options ...string) (string) {
 	}
 }
 
+// default drawCoords
 // y/limy   x/limx
 // all/szc  byte/szc
-func DrawCoors (y, x, szc, szl int) {
+func DrawCoords (y, x, szc, szl int) {
 	sll:=szc*szl
 	wprint(Win, 1, 1, spf("%s%d/%d   %d/%d   ",
 		yellow, y+1,szc,   x+1,szl,
