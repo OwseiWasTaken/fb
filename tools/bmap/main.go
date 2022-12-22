@@ -17,8 +17,11 @@ const (
 	Exp_C = iota
 )
 
-func main(){
+func main() {
 	InitTermin()
+
+	b:=ReadByteMap("daddy")
+	b.Interact()
 
 	StopTermin()
 	exit(0)
@@ -45,6 +48,7 @@ func UnparseBInt(v int) ([]byte) {
 	return ret[1:]
 }
 
+// implement \n option
 // select box
 func YorN(win *Window, text string, options ...string) (string) {
 	var (
@@ -56,18 +60,19 @@ func YorN(win *Window, text string, options ...string) (string) {
 	x = 0
 	for i:=0;i<lo;i++ {
 		ats[i] = x
-		x += len(options[i])+2
+		x += len(options[i])+1
 	}
 	x = 0
 	for {
 		wmove(win, win.LenY-2, 3)
 		for i:=0; i<lo; i++ {
 			if i != x {
-				wwrite(win, spf("%s  ", options[i]))
+				wwrite(win, spf("%s ", options[i]))
 			} else {
-				wwrite(win, spf("%s%s%s  ", blue, options[i], nc))
+				wwrite(win, spf("%s%s%s ", blue, options[i], nc))
 			}
 		}
+		wDrawBorderName(win, '#')
 		wmove(win, win.LenY-2, 3+ats[x])
 		k = wgtk(win)
 		for i:=0; i<lo; i++ {
