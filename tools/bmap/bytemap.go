@@ -125,7 +125,7 @@ func (b bytemap) Draw (yoff, xoff int) {
 		wmove(Win, i+yoff, xoff)
 		for j:=0; j<b.width; j++ {
 			if (b.cont[i*b.width+j] == 0) {
-				wwrite(Win, RGB(10,10,10)+sEmptyChar)
+				wwrite(Win, RGB(40,40,40)+sEmptyChar)
 			} else {
 				wwrite(Win, RGB(b.cont[i*b.width+j],b.cont[i*b.width+j],b.cont[i*b.width+j])+sFullChar)
 			}
@@ -136,8 +136,8 @@ func (b bytemap) Draw (yoff, xoff int) {
 
 func ByteDrawPencil (pencil uint8, PutAll int, index int) {
 	var prgb = RGB(pencil, pencil, pencil)
-	if (pencil < 10) {
-		prgb = RGB(10,10,10)
+	if (pencil < 40) {
+		prgb = RGB(40,40,40)
 	}
 	wprint(Win, 2, 1, spf("pencil:%d: %s%d%s  %s        ", // 9 spaces cuz case "e"
 		index, prgb, pencil, nc,
@@ -148,7 +148,7 @@ func ByteDrawPencil (pencil uint8, PutAll int, index int) {
 func (b bytemap) DByte (yoff, xoff, y, x int) {
 	wmove(Win, y+yoff, x+xoff)
 	if (b.cont[y*b.width+x] == 0) {
-		wwrite(Win, RGB(10,10,10)+sEmptyChar)
+		wwrite(Win, RGB(40,40,40)+sEmptyChar)
 	} else {
 		wwrite(Win,
 			RGB(
