@@ -5,7 +5,10 @@ type bytemap struct {
 }
 
 func MakeByteMap(filename string, h, w int) (bytemap) {
-	return bytemap{filename+".btm", h, w, make([]uint8, w*h)}
+	if !strings.HasSuffix(filename, ".btm") {
+		filename+=".btm"
+	}
+	return bytemap{filename, h, w, make([]uint8, w*h)}
 }
 
 //////////////////////////
@@ -85,7 +88,10 @@ func (b bytemap) save () {
 
 func (b bytemap) copy (filename string) {
 	k := b.filename
-	b.filename = filename+".btm"
+	b.filename = filename
+	if (!strings.HasSuffix(filename, ".btm")) {
+		b.filename += ".btm"
+	}
 	b.save()
 	b.filename = k
 }
@@ -291,6 +297,34 @@ func (byt bytemap) Interact () {
 			byt.Draw(yoff, xoff)
 			ByteDrawPencil(pencil, PencilMode, penindex)
 		}
+	}
+}
+
+func (b bytemap) export (tp int, filename string)  {
+	fo, err := os.Create(filename)
+	panic(err)
+	defer func() {
+		panic(fo.Close())
+	}()
+	_bmapname := strings.Split(strings.TrimSuffix(b.filename, ".btm"), "/")
+	bmapname := "bmap_"+_bmapname[len(_bmapname)-1]
+	switch tp {
+		case Exp_C:
+			fprintf(fo, "bytemap %s;\n", bmapname)
+			fprintf(fo, "%s.height = %d;\n", bmapname, b.height)
+			fprintf(fo, "%s.width = %d;\n", bmapname, b.width)
+			fprintf(fo, "byte cont[] = {\n\t")
+			i:=0
+			for ; i<(b.width*b.height)-1; i++ {
+				if i%(b.width/8) == 0 && i > 0{
+					fprintf(fo, "\n\t")
+				}
+				fprintf(fo, "%3d,", int(b.cont[i]))
+			}
+			fprintf(fo, "}\n")
+			fprintf(fo, "%s.cont = cont;\n", bmapname)
+		default:
+			printf("No such Export type %d\n", tp)
 	}
 }
 
