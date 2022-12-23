@@ -314,3 +314,51 @@ void ReadByteFbIntoBytesmap(struct fbjar jar, point top, bytesmap *b) {
 	b->cont = cont;
 }
 
+bytemap LoadBytemap(char *pathname) {
+	FILE *rd = fopen(pathname, "r");
+
+	// size of width, width array
+	int szh = 0, szw = 0;
+	ssize_t w = 0, h = 0;
+	{
+		szh = (int)getc(rd);
+		assert(szh < sizeof(ssize_t));
+		// decresent
+		byte ha[szh];
+		for (int i = 0; i<szh; i++)  {
+			ha[i] = (byte)getc(rd);
+		}
+
+
+		szw = (int)getc(rd);
+		assert(szw < sizeof(ssize_t));
+		// decresent
+		byte wa[szw];
+		for (int i = 0; i<szw; i++)  {
+			wa[i] = (byte)getc(rd);
+		}
+
+		//byte cont[w*h];
+		//read(rfd, cont, w*h);
+
+		//TODO test this
+		for (int i = 0; i<szh; i++) {
+			h = 255*h+(byte)ha[i];
+		}
+		for (int i = 0; i<szw; i++) {
+			w = 255*w+(byte)wa[i];
+		}
+	}
+	byte cont[h*w];
+	for (long i = 0; i<h*w; i++) {cont[i] = (byte)getc(rd);}
+	//read(rfd, cont, h*w);
+	fclose(rd);
+
+	bytemap b;
+	b.cont = cont;
+	b.width = w;
+	b.heigth = h;
+
+	return b;
+}
+
