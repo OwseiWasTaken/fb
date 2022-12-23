@@ -205,10 +205,11 @@ void SDrawBytemap (struct fbjar jar, bytemap bmap, point top) {
 	uint8* location = GetFbPos(jar, top.y, top.x);
 	for (uint i = 0 ; i<(bmap.heigth); i++) {
 		for (uint j = 0 ; j<(bmap.width) ; j++) {
-			location[0] = bmap.cont[i*bmap.width+j];
-			location[1] = bmap.cont[i*bmap.width+j];
-			location[2] = bmap.cont[i*bmap.width+j];
+			location[0] = bmap.cont[0];
+			location[1] = bmap.cont[0];
+			location[2] = bmap.cont[0];
 			location += jar.bpp;
+			bmap.cont++;
 		}
 		location -= jar.bpp*(bmap.width);
 		location += jar.skip;
