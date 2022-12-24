@@ -1,10 +1,43 @@
 package mapio
 
-func export (mp FlMap, Exp_id int) () {
-	Exp_Str := MapToExt[Exp_id]
-	if (Exp_Str == "") { Exp_Str = MapToExt[mp.GetId()]}
+func export (mp FlMap, ExpId int) () {
+	obj := mp.GetObj()
+	id := mp.GetId()
+	ExpStr := MapToExt[ExpId]
+	if (ExpId == 0) { ExpStr = MapToExt[id] } // if MAP_ -> self id
+
 	printf("export map %s (of type %s) to %s%s\n",
-	mp.GetObj(), MapToName[mp.GetId()], mp.GetObj(), Exp_Str)
+	obj, MapToName[id], obj, ExpStr)
+	_ExportMap(obj, mp, id, ExpId)
+}
+
+func _ExportMap(obj string, mp FlMap, MapId int, ExpId int) {
+	var out []byte
+	// write out[] with to "obj+exp-ext"
+	// and panic if it doesn't work
+	defer panic(os.WriteFile(obj+MapToExt[ExpId], out, 0644)) // 1X 2W 4R
+	switch (MapId) {
+	case MAP_: // self
+		// get bytes to save
+		bts := mp.GetByteArr()
+		// make buffer
+		out = make([]byte, FILEINTSIZE*2+len(bts))
+		// write sizes
+		iw, ih := mp.GetSize()
+		w := UnparseBInt(iw)
+		h := UnparseBInt(ih)
+		for i:=0; i<FILEINTSIZE; i++ {
+			out[i] = w[i]
+			out[i+FILEINTSIZE] = h[i]
+		}
+		// write byte array
+		for i:=0; i<len(bts); i++ {
+			out[FILEINTSIZE*2+i] = bts[i]
+		}
+		// write file
+	default:
+		die(spf("can't export bmap to %s (%d)", MapToName[ExpId], ExpId))
+	}
 }
 
 func load (filename string) (FlMap) {
@@ -13,10 +46,10 @@ func load (filename string) (FlMap) {
 		bts = ReadFileBytes(filename)
 		obj, id = GetObjAndType(filename)
 	)
-	assert(len(bts) > 8, "file too small") // w=4, h=4
+	assert(len(bts) > FILEINTSIZE*2, "file too small") // w=4, h=4
 	w := ParseBInt(bts[0:FILEINTSIZE])
 	h := ParseBInt(bts[FILEINTSIZE:FILEINTSIZE*2])
-	b := _LoadMap(obj, w, h, bts[8:], id)
+	b := _LoadMap(obj, w, h, bts[8:], id) // get map-specific content
 	return b
 }
 
