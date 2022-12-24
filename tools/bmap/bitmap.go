@@ -27,14 +27,3 @@ func (b bitmap) GetId () (int) {
 func (b bitmap) GetObj () (string) {
 	return b.objname
 }
-
-func (b bitmap) GetSize () (int, int) {
-	return b.width, b.height
-}
-
-func (b bitmap) GetPixel (y, x int) (pixel) {
-	if ( b.cont[b.width*y+x] ) {
-		return pixel{255,255,255}
-	}
-	return pixel{0,0,0}
-}

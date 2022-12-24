@@ -19,10 +19,8 @@ const (
 // cut down on interface funcs
 // make map specific .interacts
 type FlMap interface {
-	GetId() (int)
-	GetObj() (string)
-	GetSize() (int,int)
-	GetPixel(int, int) (pixel)
+	GetId() (int) // get type
+	GetObj() (string) // get name wo/ etx
 }
 
 var (

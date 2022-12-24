@@ -27,11 +27,3 @@ func (b bytesmap) GetId () (int) {
 func (b bytesmap) GetObj () (string) {
 	return b.objname
 }
-
-func (b bytesmap) GetSize () (int, int) {
-	return b.width, b.height
-}
-
-func (b bytesmap) GetPixel (y, x int) (pixel) {
-	return b.cont[b.width*y+x]
-}

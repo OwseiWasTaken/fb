@@ -1,5 +1,4 @@
-package Bytemap
-
+package Bytemap 
 type bytemap struct {
 	filename string
 	objname string
@@ -26,13 +25,4 @@ func (b bytemap) GetId () (int) {
 
 func (b bytemap) GetObj () (string) {
 	return b.objname
-}
-
-func (b bytemap) GetSize () (int, int) {
-	return b.width, b.height
-}
-
-func (b bytemap) GetPixel (y, x int) (pixel) {
-	c:=b.cont[b.width*y+x]
-	return pixel{c,c,c}
 }
