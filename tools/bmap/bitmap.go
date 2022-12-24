@@ -6,15 +6,15 @@ type bitmap struct {
 	width int
 }
 
-func MakeBitMap(filename string, h, w int) (bitmap) {
-	return bitmap{filename+"bim", make([]bool, h*w), make([]byte, h*w/8), h, w}
+func MakeBitmap(filename string, h, w int) (bitmap) {;
+	return bitmap{filename+".bim", make([]bool, h*w), make([]byte, h*w/8), h, w}
 }
 
 //////////////////////////
 ////////// back //////////
 //////////////////////////
 
-func ReadBitMap(filename string) (bitmap) {
+func ReadBitmap(filename string) (bitmap) {
 	var (
 		bflcont = ReadFileBytes(filename)
 		flcont []int = make([]int, len(bflcont))
@@ -50,7 +50,7 @@ func ReadBitMap(filename string) (bitmap) {
 			c[i*8+j] = bflcont[off+i]&(1<<(7-j%8))!=0
 		}
 	}
-	ret := MakeBitMap(filename, h, w)
+	ret := MakeBitmap(filename, h, w)
 	ret.cont = c
 	ret.btcont = bt
 	return ret
@@ -85,7 +85,7 @@ func (b bitmap) save () {
 		off++
 	}
 
-	for i:=0; i<lb; i++ {;
+	for i:=0; i<lb; i++ {
 		//printf("%d -> %d\n", j, lb)
 		out[off] = c[i]
 		off++
@@ -184,7 +184,7 @@ func (bit bitmap) Interact () {
 		k string
 		y, x int
 		limy = bit.height; limx = bit.width
-		offy = 4
+		offy = 3
 		offx = 3
 		menu = MakeWin("Menu", stdout, stdin, 2, 2+15, 2, 2+50)
 		DelAll = false
@@ -275,13 +275,29 @@ func (bit bitmap) Interact () {
 			wDrawBorderName(menu, '#')
 			wprint(menu, 2, 2, spf("file: %s", bit.filename))
 			wprint(menu, 3, 2, spf("%d bytes to save", bit.width*bit.height/8))
+			// TODO save, quit etc
 			answ := YorN(menu, "Save?", "Yes", "No")
-			if answ == "Yes" {
+			if answ[0] == 'Y' {
 				bit.save()
-				return
 			}
 			clear()
 			wDrawBorderName(Win, '#')
+		case "f8":
+			clear()
+			wprint(Win, 0, 0, spf("current name: %s\n", bit.filename))
+			wmove(Win, 1, 0)
+			wflush(Win)
+			name:=oldinput("save to>")
+			bit.copy(name)
+		case "f10":
+			return
+		case "e":
+			clear()
+			wprint(Win, 0, 0, spf("current name: %s\n", bit.filename))
+			wmove(Win, 1, 0)
+			wflush(Win)
+			name:=oldinput("export to>")
+			bit.export(Exp_C, name)
 		}
 	}
 }

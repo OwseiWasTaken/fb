@@ -20,7 +20,7 @@ const (
 func main() {
 	InitTermin()
 
-	b:=ReadByteMap("daddy")
+	b:=ReadBitmap(argv[0])
 	b.Interact()
 
 	StopTermin()

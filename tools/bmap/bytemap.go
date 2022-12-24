@@ -4,7 +4,7 @@ type bytemap struct {
 	cont []uint8
 }
 
-func MakeByteMap(filename string, h, w int) (bytemap) {
+func MakeBytemap(filename string, h, w int) (bytemap) {
 	if !strings.HasSuffix(filename, ".btm") {
 		filename+=".btm"
 	}
@@ -15,8 +15,8 @@ func MakeByteMap(filename string, h, w int) (bytemap) {
 ////////// back //////////
 //////////////////////////
 
-func ReadByteMap(filename string) (bytemap) {
-	ret := MakeByteMap(filename, 0, 0)
+func ReadBytemap(filename string) (bytemap) {
+	ret := MakeBytemap(filename, 0, 0)
 	var (
 		bflcont = ReadFileBytes(ret.filename)
 		flcont []int = make([]int, len(bflcont))
