@@ -16,6 +16,8 @@ const (
 	HERE = "\x1b[38;2;255;0;0mHERE\x1b[38;2;255;255;255m"
 )
 
+// cut down on interface funcs
+// make map specific .interacts
 type FlMap interface {
 	GetId() (int)
 	GetObj() (string)
