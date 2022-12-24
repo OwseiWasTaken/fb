@@ -26,3 +26,11 @@ func (b bytemap) GetId () (int) {
 func (b bytemap) GetObj () (string) {
 	return b.objname
 }
+
+func (b bytemap) GetSize() (int,int) {
+	return b.width, b.height
+}
+
+func (b bytemap) GetByteArr() ([]byte) {
+	return b.cont
+}

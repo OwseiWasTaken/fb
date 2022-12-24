@@ -27,3 +27,24 @@ func (b bitmap) GetId () (int) {
 func (b bitmap) GetObj () (string) {
 	return b.objname
 }
+
+func (b bitmap) GetSize() (int,int) {
+	return b.width, b.height
+}
+
+func (b bitmap) GetByteArr() ([]byte) {
+	// get cont/8 + if %8 != 0
+	ret := make([]byte, len(b.cont)/8)
+	cpy := b.cont
+	// if there aren't %8 bits
+	if len(b.cont)%SIZEOFBYTE!=0 {
+		ret = append(ret, 0)
+		for i:=0;i<SIZEOFBYTE-(len(b.cont)%SIZEOFBYTE);i++ {
+			cpy = append(cpy, false)
+		}
+	}
+	for i := 0; i<len(ret); i++ {
+		ret[i] = CompressByte(cpy[SIZEOFBYTE*i:SIZEOFBYTE*(i+1)])
+	}
+	return ret
+}

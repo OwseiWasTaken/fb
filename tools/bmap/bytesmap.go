@@ -27,3 +27,18 @@ func (b bytesmap) GetId () (int) {
 func (b bytesmap) GetObj () (string) {
 	return b.objname
 }
+
+func (b bytesmap) GetSize() (int,int) {
+	return b.width, b.height
+}
+
+func (b bytesmap) GetByteArr() ([]byte) {
+	ret := make([]byte, len(b.cont)*3)
+	for i:=range b.cont {
+		ret[i*3+0] = b.cont[i].R
+		ret[i*3+1] = b.cont[i].G
+		ret[i*3+2] = b.cont[i].B
+	}
+	return ret
+}
+
