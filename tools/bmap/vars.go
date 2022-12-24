@@ -21,6 +21,10 @@ const (
 type FlMap interface {
 	GetId() (int) // get type
 	GetObj() (string) // get name wo/ etx
+	GetSize() (int,int)
+	GetByteArr() ([]byte)
+	// SelfToItst // self -> bytemap
+	// ItstToSelf // bytemap -> self
 }
 
 var (
@@ -77,6 +81,15 @@ func ExpandByte(v byte) (ret []bool) {
 		b[i] = v&(1<<(SIZEOFBYTE-i-1))!=0
 	}
 	return b
+}
+
+func CompressByte(b []bool) (ret byte) {
+	ret = 0
+	for i := range b {
+		ret += bog(b[i], byte(1<<(len(b)-i-1)), byte(0)).(byte)
+		//ret += bog(b[i], byte(1<<i), byte(0)).(byte)
+	}
+	return ret
 }
 
 func _GetType(name string) (int) {
