@@ -190,7 +190,7 @@ int main(int argc, char* argv[]) {
 	assert(top.x-pad > 0);
 	int BatLvl = GetAvgBat();
 	DrawBat(jar, BatLvl, pad, top, len, NULL);
-	while (loop) {
+	for (byte i = 0; loop; i++) {
 		color clear = RGB(0,0,0);
 		color charging = RGB(80,200,80);
 		// for charing animation
@@ -202,9 +202,9 @@ int main(int argc, char* argv[]) {
 			DrawBat(jar, 100, pad, top, len, &clear);
 		} else {
 			DrawBat(jar, BatLvl, pad, top, len, NULL);
-			sleep(6);
 		}
-		BatLvl = GetAvgBat();
+		sleep(1);
+		if (!i%10) BatLvl = GetAvgBat();
 	}
 
 	StopBuffy(jar);
