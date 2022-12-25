@@ -6,17 +6,17 @@ func export (mp FlMap, ExpId int) () {
 	ExpStr := MapToExt[ExpId]
 	if (ExpId == 0) { ExpStr = MapToExt[id] } // if MAP_ -> self id
 
-	printf("export map %s (of type %s) to %s%s\n",
+	printf("exporting map %s (of type %s) to %s%s\n",
 	obj, MapToName[id], obj, ExpStr)
-	_ExportMap(obj, mp, id, ExpId)
+	_ExportMap(obj, mp, ExpId)
 }
 
-func _ExportMap(obj string, mp FlMap, MapId int, ExpId int) {
+func _ExportMap(obj string, mp FlMap, ExpId int) {
 	var out []byte
 	// write out[] with to "obj+exp-ext"
 	// and panic if it doesn't work
 	defer panic(os.WriteFile(obj+MapToExt[ExpId], out, 0644)) // 1X 2W 4R
-	switch (MapId) {
+	switch (ExpId) {
 	case MAP_: // self
 		// get bytes to save
 		bts := mp.GetByteArr()
