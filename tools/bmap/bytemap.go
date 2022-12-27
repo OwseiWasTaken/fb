@@ -1,4 +1,5 @@
 package Bytemap
+
 type bytemap struct {
 	filename string
 	objname string
