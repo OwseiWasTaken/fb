@@ -1,43 +1,84 @@
 package main
 
-include "vars.go"
-include "io.go"
+var (
+	debug bool = false
+)
+
 include "gutil"
+Include "termin"
+include "vars.go"
+
+include "io.go"
+
 include "bitmap.go"
 include "bytemap.go"
 include "bytesmap.go"
 
+include "editor.go"
+
 func main() {
 	// flags
 	var (
-		interact = true
-		asf = false // already saved file
-		export = false // auto export
-		ExpId int
-		expto string
+		interact = true // interact/export map
+		asf = false // load/create file
+
+		expto string = "new"
+		ExpId int = MAP_
+
 		objname string = "new"
+		IptId int = MAP_
+
+		filename string
 	)
 
 	for i:=0; i<len(argv); i++{
 		if argv[i][0] != '-' {
 			assert(!asf, spf("no overwrite of input $%d→\"%s\"", i, argv[i]))
-			asf = true
-			objname, ExpId = GetObjAndType(argv[i])
+			asf = exists(argv[i])
+			objname, IptId = GetObjAndType(argv[i])
+			if (ExpId == MAP_) {ExpId = IptId}
 		} else if argv[i] == "-e" {
 			i++
 			if !(i < len(argv)) {continue}
 			expto = argv[i]
-			objname, ExpId = GetObjAndType(expto)
-			export = true
-		} else if argv[i] == "-s" { // static
+			expto, ExpId = GetObjAndType(expto)
 			interact = false
+		} else if argv[i] == "--debug" {
+			debug = true
 		} else {
 			die(spf("can't parse arg %d \"%s\"", i, argv[i]))
 		}
 	}
 
-	PS("open at `", objname, "` i:", interact, " e:",asf, " do e:", export, " o:`",expto, "` otype:",MapToExt[ExpId])
-	//b:=load("here.bim").(bitmap)
-	//b.btcont[0] = 0xae
-	//export(b, MAP_)
+	if IptId == MAP_ {
+		//TODO: remake YorN
+		// use YorN to get ID of map
+	}
+	filename = objname+MapToExt[IptId]
+
+	if (debug) {
+		printf("open `%s` as %s\nm:'%s' c:'%s'\nout: %s as %s\n",
+			filename, MapToName[IptId],
+			bog(interact, "interact", "export").(string), bog(asf, "load", "create"),
+			expto, MapToName[ExpId],
+		)
+	}
+
+	var b FlMap
+	if asf {
+		b = load(objname+MapToExt[IptId])
+	} else {
+		b = MakeMap(filename, IptId, 11, 11)
+	}
+
+	InitTermin()
+	//export(b, ExpId)
+	scr := MakeWin("",
+		stdout, stdin,
+		0, Win.MaxY,
+		0, Win.MaxX,
+	)
+
+	iEdit(b, scr)
+	StopTermin()
 }
