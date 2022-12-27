@@ -14,6 +14,8 @@ const (
 	FILEINTSIZE = 4
 	SIZEOFBYTE = 8
 	HERE = "\x1b[38;2;255;0;0mHERE\x1b[38;2;255;255;255m"
+	EDITOR_YOFF = 2
+	EDITOR_XOFF = 3
 )
 
 // cut down on interface funcs
@@ -23,6 +25,8 @@ type FlMap interface {
 	GetObj() (string) // get name wo/ etx
 	GetSize() (int,int)
 	GetByteArr() ([]byte)
+	GetPxArray() ([]pixel)
+	SetPxArray([]pixel) ()
 	// SelfToItst // self -> bytemap
 	// ItstToSelf // bytemap -> self
 }
@@ -107,3 +111,23 @@ func GetObjAndType(name string) (obj string, id int) {
 	obj = name[:dot]
 	return
 }
+
+func MakeMap(filename string, id, w, h int) (FlMap) {
+	var b FlMap = nil
+	switch (id) {
+	case MAP_bit:
+		b = MakeBitmap(filename, w, h)
+	case MAP_byte:
+		b = MakeBytemap(filename, w, h)
+	case MAP_bytes:
+		b = MakeBytesmap(filename, w, h)
+	default:
+		die(spf("MakeMap can't create id %d", id))
+	}
+	return b
+}
+
+func PxMean(p pixel) (byte) {
+	return byte((int(p.R)+int(p.G)+int(p.B))/3)
+}
+
