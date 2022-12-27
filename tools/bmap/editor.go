@@ -39,7 +39,7 @@ func iEdit (mp FlMap, scr *Window) {
 
 func YorN (options ...string) (string) {
 	jmp := make([]bool, len(options))
-	var qst []string = {options[0]}
+	var qst []string = []string{options[0]}
 	//TODO finish
 }
 
