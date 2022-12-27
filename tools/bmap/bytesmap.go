@@ -42,3 +42,12 @@ func (b bytesmap) GetByteArr() ([]byte) {
 	return ret
 }
 
+func (b bytesmap) GetPxArray() ([]pixel) {
+	return b.cont
+}
+
+func (b bytesmap) SetPxArray(p []pixel) {
+	assert(len(p) == b.width*b.height, "bytesmap.SetPxArr len of px array and cont aren't equal")
+	b.cont = p
+}
+

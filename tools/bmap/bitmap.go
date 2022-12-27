@@ -48,3 +48,30 @@ func (b bitmap) GetByteArr() ([]byte) {
 	}
 	return ret
 }
+
+func (b bitmap) GetPixel(y, x int) (pixel) {
+	if b.cont[y*b.width+x] {
+		return pixel{255,255,255}
+	}
+	return pixel{  0,  0,  0}
+}
+
+func (b bitmap) GetPxArray() ([]pixel) {
+	var ret []pixel = make([]pixel, b.width*b.height)
+	for i := range b.cont {
+		if !b.cont[i] {
+			ret[i] = pixel{255,255,255}
+		} else {
+			ret[i] = pixel{  0,  0,  0}
+		}
+	}
+	return ret
+}
+
+func (b bitmap) SetPxArray(p []pixel) {
+	assert(len(p) == b.width*b.height, "bitmap.SetPxArr len of px array and cont aren't equal")
+	for i:=range p {
+		b.cont[i] = PxMean(p[i])>127
+	}
+}
+
