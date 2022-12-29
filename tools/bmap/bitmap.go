@@ -57,9 +57,9 @@ func (b bitmap) GetPixel(y, x int) (pixel) {
 }
 
 func (b bitmap) GetPxArray() ([]pixel) {
-	var ret []pixel = make([]pixel, b.width*b.height)
+	var ret []pixel = make([]pixel, len(b.cont))
 	for i := range b.cont {
-		if !b.cont[i] {
+		if b.cont[i] {
 			ret[i] = pixel{255,255,255}
 		} else {
 			ret[i] = pixel{  0,  0,  0}
