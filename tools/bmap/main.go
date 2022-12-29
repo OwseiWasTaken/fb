@@ -1,7 +1,7 @@
 package main
 
 var (
-	debug bool = false
+	debug bool
 )
 
 include "gutil"
@@ -33,7 +33,7 @@ func main() {
 
 	for i:=0; i<len(argv); i++{
 		if argv[i][0] != '-' {
-			assert(!asf, spf("no overwrite of input $%d→\"%s\"", i, argv[i]))
+			assert(!asf, spf("no overwrite of input $%d→\"%s\"", i, argv[i]));
 			asf = exists(argv[i])
 			objname, IptId = GetObjAndType(argv[i])
 			if (ExpId == MAP_) {ExpId = IptId}
@@ -50,35 +50,45 @@ func main() {
 		}
 	}
 
+	// init visual
+	InitTermin()
+
 	if IptId == MAP_ {
-		//TODO: remake YorN
-		// use YorN to get ID of map
+		IptId=YorN(-2, -1,
+			"type of image for "+objname, "\n",
+			"bit", "\n",
+			"byte", "\n",
+			"bytes", "\n",
+		)+2 // +2  to skip MAP_, MAP_C
+		clear()
 	}
 	filename = objname+MapToExt[IptId]
 
 	if (debug) {
-		printf("open `%s` as %s\nm:'%s' c:'%s'\nout: %s as %s\n",
+		printf("open `%s` as %s\nm:'%s' f:'%s'\nout: %s as %s\n",
 			filename, MapToName[IptId],
-			bog(interact, "interact", "export").(string), bog(asf, "load", "create"),
+			bog(interact, "interact", "export"),
+			bog(asf, "load", "create"),
 			expto, MapToName[ExpId],
 		)
+		oldinput("%")
+		clear()
 	}
 
 	var b FlMap
 	if asf {
-		b = load(objname+MapToExt[IptId])
+		b = load(filename)
 	} else {
-		b = MakeMap(filename, IptId, 11, 11)
+		b = MakeMap(filename, IptId, DEFAULT_MAP_Y, DEFAULT_MAP_X)
 	}
 
-	InitTermin()
 	//export(b, ExpId)
-	scr := MakeWin("",
+	scr := MakeWin("", // no need to wend, since this win is not temporary
 		stdout, stdin,
 		0, Win.MaxY,
 		0, Win.MaxX,
 	)
-
 	iEdit(b, scr)
 	StopTermin()
+	exit(0)
 }
