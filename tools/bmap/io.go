@@ -58,7 +58,6 @@ func _LoadMap(objname string, w, h int, cont []byte, id int) (FlMap) {
 	case MAP_bit:
 		b := MakeBitmap(objname, w, h)
 		b.btcont = cont
-		b.cont[0] = true
 		for i := range cont {
 			l:=ExpandByte(cont[i])
 			for j := range l {
