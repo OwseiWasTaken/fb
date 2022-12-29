@@ -11,11 +11,25 @@ const (
 )
 
 const (
+	HERE = "\x1b[38;2;255;0;0mHERE\x1b[38;2;255;255;255m"
+
+	// io.go
 	FILEINTSIZE = 4
 	SIZEOFBYTE = 8
-	HERE = "\x1b[38;2;255;0;0mHERE\x1b[38;2;255;255;255m"
-	EDITOR_YOFF = 2
-	EDITOR_XOFF = 3
+
+	// editor.go
+	EDITOR_YOFF = 3
+	EDITOR_XOFF = 10
+
+	// YorN
+	YORN_YOFF = 1
+	YORN_XOFF = 2
+	COL_HL = "\x1b[38;2;255;128;0m"
+	COL_NC = "\x1b[38;2;255;255;255m"
+
+	// MakeMap()
+	DEFAULT_MAP_Y = 10
+	DEFAULT_MAP_X = 10
 )
 
 // cut down on interface funcs
@@ -25,11 +39,13 @@ type FlMap interface {
 	GetObj() (string) // get name wo/ etx
 	GetSize() (int,int)
 	GetByteArr() ([]byte)
+	// self -> bytesmap
 	GetPxArray() ([]pixel)
+	// bytesmap -> self
 	SetPxArray([]pixel) ()
-	// SelfToItst // self -> bytemap
-	// ItstToSelf // bytemap -> self
 }
+
+type point struct { y, x int }
 
 var (
 	MapToExt = []string{
@@ -106,7 +122,8 @@ func _GetType(name string) (int) {
 
 func GetObjAndType(name string) (obj string, id int) {
 	dot := strings.Index(name, ".")
-	assert(dot > 0, "GetObjAndType: no '.' in filename")
+	//assert(dot > 0, "GetObjAndType: no '.' in filename")
+	if dot < 0 {return name, MAP_}
 	id = _GetType(name[dot:])
 	obj = name[:dot]
 	return
@@ -129,5 +146,116 @@ func MakeMap(filename string, id, w, h int) (FlMap) {
 
 func PxMean(p pixel) (byte) {
 	return byte((int(p.R)+int(p.G)+int(p.B))/3)
+}
+
+func YorN (szy, szx int, name string, options ...string) (int) {
+	// find linefeeds
+	ats := make([]point, len(options))
+	yat := YORN_YOFF // tmp
+	{
+		xat := YORN_XOFF // tmp
+
+		for i := range options {
+			if options[i] == "\n" {
+				ats[i] = point{0, 0}
+				yat++
+				xat = YORN_XOFF
+			} else {
+				ats[i] = point{yat, xat}
+				xat+=len(options[i])+1
+			}
+		}
+	}
+	if szy < 0 {
+		szy = szy*-1 + yat-YORN_YOFF + 2
+	}
+
+	// biggest option, or len of question?
+	if szx < 0 {
+		// +2 = padding in (both sides)
+		szx = szx*-1 + len(name) + 4
+	}
+
+	mxy, mxx := GetTerminalSize()
+	assert(szx < mxx,
+		spf("YorN:	szx (%d) bigger than the terminal (%d)",
+		szx, mxx))
+	assert(szy < mxy,
+		spf("YorN:	szy (%d) bigger than the terminal (%d)",
+		szy, mxy))
+
+	scr := MakeWin(name,
+		stdout, stdin,
+		0+YORN_YOFF, szy,
+		0+YORN_XOFF, szx,
+	)
+	defer wend(scr)
+	wDrawBorderName(scr, '#')
+
+	irn := 0
+	for ;(ats[irn].x == 0 && len(options) > (irn+1)); {
+		irn++
+	}
+	krn := irn
+	rn := ats[irn]
+	iret := 0
+
+	for i := range options {
+		if i != irn {
+			wprint(scr, ats[i].y, ats[i].x, options[i])
+		} else {
+			wuprint(scr, ats[i].y, ats[i].x, COL_HL+options[i]+COL_NC)
+		}
+	}
+
+	var k string
+	for { // draw and color
+		for i := range options {
+			if i != irn {
+				wprint(scr, ats[i].y, ats[i].x, options[i])
+			} else {
+				wuprint(scr, ats[i].y, ats[i].x, COL_HL+options[i]+COL_NC)
+			}
+		}
+		wmove(scr, rn.y, rn.x-1)
+
+		k = wgtk(scr)
+		// move and choose
+		if (k == "down" || k == "right") {
+			krn = irn
+			irn++
+			for ;(ats[irn].x == 0 && len(options) > (irn+1)); {
+				irn++
+			}
+			if ats[irn].x == 0 {
+				irn = krn
+				iret--
+			}
+			iret++
+			rn = ats[irn]
+		} else if (k == "up" || k == "left" ) && irn!=0 {
+			krn = irn
+			irn--
+			for ;(ats[irn].x == 0 && irn != 0); {
+				irn--
+			}
+			if ats[irn].x == 0 {
+				irn = krn
+				iret++
+			}
+			iret--
+			rn = ats[irn]
+		} else if k == "enter" || k == "space" {
+			return iret
+		}
+	}
+}
+
+func pxRGB(px pixel) (string) {
+	return spf("\x1b[38;2;%d;%d;%dm", px.R, px.G, px.B)
+}
+
+func pxSum(px pixel) (int) {
+	return int(px.R)+int(px.G)+int(px.B)
 }
 
