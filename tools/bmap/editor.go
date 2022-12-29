@@ -25,7 +25,7 @@ func prtmap  (wmap *Window, pxmap []pixel) {
 	for i := 0; i<wmap.LenY-2; i++ {
 		wmove(wmap, i+1, 1)
 		for j := 0; j<wmap.LenX-1; j++ {
-			wwrite(wmap, pxRGB(pxmap[i])+"#")
+			wwrite(wmap, pxRGB(pxmap[i*(wmap.LenX-1)+j])+"#")
 		}
 	}
 	wwrite(wmap, RGB(255,255,255))
@@ -125,8 +125,9 @@ func iEdit (mp FlMap, scr *Window) {
 		case "z":
 			pcho=(pcho+7)%8
 			prtpen( scr, pencil, pcho, wmap.MinY )
+		case "q":
+			return
 		}
-
 	}
 }
 
