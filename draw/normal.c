@@ -348,3 +348,11 @@ void ApplyBytemap (struct fbjar jar, bytemap bmap, point top, int chan) {
 	}
 }
 
+void DrawPoint (struct fbjar jar, point at, color col) {
+	assert(CheckPIJ(jar, at));
+
+	uint8* location = GetFbPos(jar, at.y, at.x);
+	location[0] = col.B;
+	location[1] = col.G;
+	location[2] = col.R;
+}
