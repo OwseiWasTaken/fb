@@ -123,6 +123,16 @@ inline point MakePoint(const int y, const int x) {
 	return p;
 }
 
+inline ppoint MakepPoint(const float y, const float x) {
+	ppoint p = {.y = y, .x = x};
+	return p;
+}
+
+inline point pMakePoint(const ppoint p) {
+	point r = {.y = (int)p.y, .x = (int)p.x};
+	return r;
+}
+
 point MovePoint(const point p, const int y, const int x) {
 	point r = {.y = p.y+y, .x = p.x+x};
 	return r;
@@ -130,6 +140,16 @@ point MovePoint(const point p, const int y, const int x) {
 
 point pMovePoint(const point p, const point d /*diff*/ ) {
 	point r = {.y = p.y+d.y, .x = p.x+d.x};
+	return r;
+}
+
+ppoint pMovepPoint(const ppoint p, const point d /*diff*/ ) {
+	ppoint r = {.y = p.y+(float)d.y, .x = p.x+(float)d.x};
+	return r;
+}
+
+ppoint ppMovepPoint(const ppoint p, const ppoint d /*diff*/ ) {
+	ppoint r = {.y = p.y+d.y, .x = p.x+d.x};
 	return r;
 }
 
