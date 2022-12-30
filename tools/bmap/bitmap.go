@@ -71,7 +71,7 @@ func (b bitmap) GetPxArray() ([]pixel) {
 func (b bitmap) SetPxArray(p []pixel) {
 	assert(len(p) == b.width*b.height, "bitmap.SetPxArr len of px array and cont aren't equal")
 	for i:=range p {
-		b.cont[i] = PxMean(p[i])>127
+		b.cont[i] = pxSum(p[i])>(127*3)
 	}
 }
 
