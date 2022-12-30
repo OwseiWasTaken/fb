@@ -204,7 +204,7 @@ int main(int argc, char* argv[]) {
 			DrawBat(jar, BatLvl, pad, top, len, NULL);
 		}
 		sleep(1);
-		if (!i%10) BatLvl = GetAvgBat();
+		if (!(i%10)) BatLvl = GetAvgBat();
 	}
 
 	StopBuffy(jar);
