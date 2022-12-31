@@ -39,7 +39,7 @@ func main() {
 			if (ExpId == MAP_) {ExpId = IptId}
 		} else if argv[i] == "-e" {
 			i++
-			if !(i < len(argv)) {continue}
+			assert(i < len(argv), "-e needs filename")
 			expto = argv[i]
 			expto, ExpId = GetObjAndType(expto)
 			interact = false
@@ -83,12 +83,8 @@ func main() {
 	}
 
 	//export(b, ExpId)
-	scr := MakeWin("", // no need to wend, since this win is not temporary
-		stdout, stdin,
-		0, Win.MaxY,
-		0, Win.MaxX,
-	)
-	iEdit(b, scr)
+	iEdit(b, Win)
 	StopTermin()
+	clear()
 	exit(0)
 }
