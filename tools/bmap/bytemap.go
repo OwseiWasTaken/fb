@@ -47,7 +47,7 @@ func (b bytemap) GetPxArray() ([]pixel) {
 func (b bytemap) SetPxArray(p []pixel) {
 	assert(len(p) == b.width*b.height, "bytemap.SetPxArr len of px array and cont aren't equal")
 	for i:=range p {
-		b.cont[i] = PxMean(p[i])
+		b.cont[i] = pxMean(p[i])
 	}
 }
 
