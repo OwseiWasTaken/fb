@@ -1,11 +1,6 @@
 #include "buffy.h"
 
-int CountDecimalDigits( int v ) {
-	int i;
-	for (i = 0; v; i++) {v = v/10;}
-	return i;
-}
-
+//TODO: get output directly
 int GetDelay() {
 	system("ping 8.8.8.8 -c 2 | sed 's/ /\\n/g' | sed 's/\\\\/\\n /g' | tail -n 2 | head -n 1 > /tmp/PingOut");
 	FILE *rd = fopen("/tmp/PingOut", "r");
@@ -23,8 +18,11 @@ int GetDelay() {
 int main (int argc, char *argv[]){
 	int precision = 10;
 	int AvgDelay = GetDelay(precision); // in ms
-	// get "excelent", "good", "medium", "bad" delays
 	// make wifi symbol bitmap
-	printf("%i -> %i\n%i\n", 1000, CountDecimalDigits(1234), AvgDelay);
+	//struct fbjar jar = InitBuffy();
+
+	printf("average wifi delay %dms\n", AvgDelay);
+
+	//StopBuffy(jar);
 }
 
