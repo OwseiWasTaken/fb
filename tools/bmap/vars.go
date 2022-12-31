@@ -144,7 +144,7 @@ func MakeMap(filename string, id, w, h int) (FlMap) {
 	return b
 }
 
-func PxMean(p pixel) (byte) {
+func pxMean(p pixel) (byte) {
 	return byte((int(p.R)+int(p.G)+int(p.B))/3)
 }
 
