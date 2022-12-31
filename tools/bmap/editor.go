@@ -4,21 +4,22 @@ var _dbg_prt_len int = 0
 var pprt int
 var col_prt string
 
-//TODO: should i make a status window
+//TODO: should i make a status window?
 func dbg (scr *Window, format string, stuff ...interface{}) {
 	if format == "\\" {
 		cleardbg(scr)
-		wprint(scr, -1, _dbg_prt_len, spf("%v", stuff[0]))
+		wprint(scr, 1, _dbg_prt_len, spf("%v", stuff[0]))
 	} else {
 		msg := spf(format, stuff...)
-		wprint(scr, -1, _dbg_prt_len, msg)
+		wprint(scr, 1, _dbg_prt_len, msg)
 		_dbg_prt_len += len(msg)+1 // +1 for padding
 	}
 }
 
 func cleardbg (scr *Window) {
 	_dbg_prt_len = 0
-	wDrawLine(scr, -1, ' ') // clear status line
+	wDrawLine(scr, 0, '-') // clear status line div
+	wDrawLine(scr, 1, ' ') // clear status line
 }
 
 func prtmap  (wmap *Window, pxmap []pixel) {
@@ -29,6 +30,37 @@ func prtmap  (wmap *Window, pxmap []pixel) {
 		}
 	}
 	wwrite(wmap, RGB(255,255,255))
+}
+
+func prtpixel(wmap *Window, y, x int, pxmap []pixel) {
+	wmove(wmap, y+1, x+1)
+	wwrite(wmap, pxRGB(pxmap[y*(wmap.LenX-1)+x])+"#"+RGB(255,255,255))
+}
+
+func GetInput(scr *Window) (string) {
+	var (
+		x int
+		line string
+		//minx = 0
+		//maxx = scr.LenX
+	)
+	line = "uwu"
+	dbg(scr, "\\", line)
+	wmove(scr, 1, x)
+	wgtk(scr)
+	PS()
+	wgtk(scr)
+	return line
+}
+
+func GetMapType(scr *Window) (int) {
+	var line string = GetInput(scr)
+	for id, name := range MapToName {
+		if name == line {
+			return id
+		}
+	}
+	return -1
 }
 
 func prtpen  (scr *Window, pencil [8]pixel, pcho int, y int) {
@@ -48,10 +80,10 @@ func prtpen  (scr *Window, pencil [8]pixel, pcho int, y int) {
 	wwrite(scr, RGB(255,255,255))
 }
 
-
 func iEdit (mp FlMap, scr *Window) {
 	var (
 		wmap *Window
+		wstatus *Window
 		k string
 		y int
 		mxy int
@@ -62,12 +94,11 @@ func iEdit (mp FlMap, scr *Window) {
 		pcho = 0
 	)
 	wDrawLine(scr, -2, '-')
-	cleardbg(scr)
 
 
 	scr.name = spf("edit map `%s`", mp.GetObj()+MapToExt[mp.GetId()])
-	w, h := mp.GetSize()
 
+	w, h := mp.GetSize()
 	wmap = MakeWin("Map Viwer",
 		stdout, nil,
 		EDITOR_YOFF, w+EDITOR_YOFF+2,
@@ -76,8 +107,11 @@ func iEdit (mp FlMap, scr *Window) {
 	mxy = wmap.LenY-3 // -2 for padding, -1 for len
 	mxx = wmap.LenX-2 // -2 for padding, -1 for len
 
-	//wput(wmap, 'o')
-
+	wstatus = MakeWin("Status Line",
+		stdout, stdin,
+		scr.MaxY-2,scr.LenY,
+		0,scr.LenX,
+	)
 
 	if (debug) {
 		pencil[0] = pixel{255,0,0}
@@ -87,14 +121,13 @@ func iEdit (mp FlMap, scr *Window) {
 		pencil[4] = pixel{0,127,255}
 	}
 
-
 	// major draw cycle
 	wDrawBorderName(scr, ' ')
 	wDrawBorderName(wmap, 'o')
 	prtpen( scr, pencil, pcho, wmap.MinY )
 	prtmap( wmap, pxmap )
 
-	dbg(scr, "\\", "")
+	dbg(wstatus, "\\", "")
 
 	for {
 		//{
@@ -125,8 +158,14 @@ func iEdit (mp FlMap, scr *Window) {
 		case "z":
 			pcho=(pcho+7)%8
 			prtpen( scr, pencil, pcho, wmap.MinY )
+		case "space":
+			pxmap[y*(wmap.LenX-1)+x] = pencil[pcho]
+			prtpixel(wmap, y, x, pxmap)
 		case "q":
 			return
+		case "f7":
+			dbg(wstatus, "\\", "convert image")
+			dbg(wstatus, "\\", mp.GetObj()+" -> "+GetInput(wstatus))
 		}
 	}
 }
