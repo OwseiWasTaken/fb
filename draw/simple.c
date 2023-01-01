@@ -1,5 +1,5 @@
 void SDrawAllLine (
-	struct fbjar jar, int y
+	struct fbjar jar, uint y
 ) {
 	assert(CheckInJar(jar, y, 0));
 
@@ -9,12 +9,12 @@ void SDrawAllLine (
 }
 
 void SDrawAllCollum (
-	struct fbjar jar, int x
+	struct fbjar jar, uint x
 ) {
 	assert(CheckInJar(jar, 0, x));
 
 	uint8* location = GetFbPos(jar, 0, x);
-	int y;
+	uint y;
 
 	for (y = 0;y<jar.rows;y++) {
 		location[0 + y*jar.skip] = 255;
@@ -23,13 +23,13 @@ void SDrawAllCollum (
 	}
 }
 
-void SDrawPartLine (struct fbjar jar, int y, int StartX, int EndX) {
+void SDrawPartLine (struct fbjar jar, uint y, uint StartX, uint EndX) {
 	assert(CheckInJar(jar, y, StartX));
 	assert(CheckInJar(jar, y, EndX));
 
 	uint8* location = GetFbPos(jar, y, StartX);
-	int Xlen = (EndX - StartX)*jar.bpp;
-	int x;
+	uint Xlen = (EndX - StartX)*jar.bpp;
+	uint x;
 
 	for (x = 0 ; x<Xlen ; x+=jar.bpp) {
 		*(location + x) = 255;
@@ -40,16 +40,16 @@ void SDrawPartLine (struct fbjar jar, int y, int StartX, int EndX) {
 
 void SDrawPartCollum (
 		struct fbjar jar,
-		int x, int StartY, int EndY
+		uint x, uint StartY, uint EndY
 ) {
 	assert(CheckInJar(jar, StartY, x));
 	assert(CheckInJar(jar, EndY, x));
 
 	uint8* location = GetFbPos(jar, StartY, x);
-	int Ylen = (EndY - StartY);
-	int sk = jar.yoff*jar.skip;
+	uint Ylen = (EndY - StartY);
+	uint sk = jar.yoff*jar.skip;
 
-	for (int y = 0;y<Ylen;y++) {
+	for (uint y = 0;y<Ylen;y++) {
 		sk+=jar.skip;
 		*(location + 0 + sk) = 255;
 		*(location + 1 + sk) = 255;
@@ -74,16 +74,11 @@ void SRFillRectangle (
 	assert(CheckInJar(jar, bot.y+top.y, bot.x+top.x));
 	assert(CheckPIJ(jar, top));
 	uint8* location = GetFbPos(jar, top.y, top.x);
-	int limy = bot.y*jar.skip;
-	int limx = bot.x*jar.bpp;
+	uint limy = (uint)bot.y*jar.skip;
+	uint limx = (uint)bot.x*jar.bpp;
 
-	for (int i = 0; i < limy ; i+=jar.skip ) {
+	for (uint i = 0; i < limy ; i+=jar.skip ) {
 		memset(location, 255, jar.bpp*limx);
-		//for (int j = 0; j < limx ; j+=jar.bpp ) {
-		//	*(location + 0 + j + i) = 255;
-		//	*(location + 1 + j + i) = 255;
-		//	*(location + 2 + j + i) = 255;
-		//}
 	}
 }
 
@@ -94,15 +89,10 @@ void SFillRectangle (
 	assert(CheckPIJ(jar, top));
 	assert(CheckPIJ(jar, bot));
 	uint8* location = GetFbPos(jar, top.y, top.x);
-	int limy = (top.y-bot.y)*jar.skip;
-	int limx = (top.x-bot.x)*jar.bpp;
-	for (int i = 0; i < limy ; i+=jar.skip ) {
+	uint limy = (uint)(top.y-bot.y)*jar.skip;
+	uint limx = (uint)(top.x-bot.x)*jar.bpp;
+	for (uint i = 0; i < limy ; i+=jar.skip ) {
 		memset(location, 255, jar.bpp*limx);
-		//for (int j = 0; j < limx ; j+=jar.bpp ) {
-		//	*(location + 0 + j + i) = 255;
-		//	*(location + 1 + j + i) = 255;
-		//	*(location + 2 + j + i) = 255;
-		//}
 	}
 }
 
@@ -163,9 +153,6 @@ void SFillCircle (
 				location[0+(x+r)*jar.bpp + (y+r)*jar.skip] = 255;
 				location[1+(x+r)*jar.bpp + (y+r)*jar.skip] = 255;
 				location[2+(x+r)*jar.bpp + (y+r)*jar.skip] = 255;
-				//*(location + 0 + (x+r)*jar.bpp + (y+r)*jar.skip) = 255;
-				//*(location + 1 + (x+r)*jar.bpp + (y+r)*jar.skip) = 255;
-				//*(location + 2 + (x+r)*jar.bpp + (y+r)*jar.skip) = 255;
 			}
 		}
 	}
@@ -193,7 +180,7 @@ void SDrawBitmap (struct fbjar jar, bitmap bmap, point top) {
 //unsanfe
 void SApplyBitmap (struct fbjar jar, bitmap bmap, point top) {
 	uint8* location = GetFbPos(jar, top.y, top.x);
-	for (int i = 0 ; i<(bmap.heigth); i++) {
+	for (uint i = 0 ; i<(bmap.heigth); i++) {
 		for (uint j = 0 ; j<(bmap.width) ; j++) {
 			if (bmap.cont[i*bmap.width+j]) {
 				location[0] = 255;
@@ -226,7 +213,7 @@ void SDrawBytemap (struct fbjar jar, bytemap bmap, point top) {
 //unsanfe
 void SApplyBytemap (struct fbjar jar, bytemap bmap, point top) {
 	uint8* location = GetFbPos(jar, top.y, top.x);
-	for (int i = 0 ; i<(bmap.heigth); i++) {
+	for (uint i = 0 ; i<(bmap.heigth); i++) {
 		for (uint j = 0 ; j<(bmap.width) ; j++) {
 			if (bmap.cont[i*bmap.width+j]) {
 				location[0] = bmap.cont[i*bmap.width+j];
