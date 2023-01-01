@@ -35,12 +35,12 @@
 // complex defs
 struct fbjar {
 	uint8* fbmem;
-	int bpp; // bytes per pixel
-	int xoff, yoff;
-	int skip; // skip from y to y+1 (in bytes)
-	int rows, cols;
-	long int screensize;
-	int fd;
+	uint bpp; // bytes per pixel
+	uint xoff, yoff;
+	uint skip; // skip from y to y+1 (in bytes)
+	uint rows, cols;
+	unsigned long int screensize;
+	uint fd;
 	FILE* log;
 	char* tty;
 };
@@ -54,7 +54,7 @@ typedef struct {
 // only control is on/off
 typedef struct {
 	bool* cont;
-	int heigth, width;
+	uint heigth, width;
 } bitmap;
 
 // one byte for pixel
@@ -65,13 +65,13 @@ typedef struct {
 // full control intensity, for now
 typedef struct {
 	byte* cont;
-	int heigth, width;
+	uint heigth, width;
 } bytemap;
 
 // bpp = 3, RGB
 typedef struct {
 	color* cont;
-	int heigth, width;
+	uint heigth, width;
 } bytesmap;
 
 // global jar
