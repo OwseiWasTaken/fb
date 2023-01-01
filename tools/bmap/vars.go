@@ -10,6 +10,77 @@ const (
 	MAP_bytes
 )
 
+var (
+	TextToId = map[string]int{
+		"":MAP_,
+		"bit":MAP_bit,
+		"bitm":MAP_bit,
+		"mbit":MAP_bit,
+		"bitmap":MAP_bit,
+		"mapbit":MAP_bit,
+		"bmap":MAP_bit,
+		"bimap":MAP_bit,
+		"bim":MAP_bit,
+		"bi":MAP_bit
+
+		"byte":MAP_byte,
+		"bytem":MAP_byte,
+		"mbyte":MAP_byte,
+		"bytemap":MAP_byte,
+		"mapbyte":MAP_byte,
+		"bymap":MAP_byte,
+		"bytmap":MAP_byte,
+		"btmap":MAP_byte,
+		"btm":MAP_byte,
+		"bt":MAP_byte // bruh
+
+		"bite":MAP_byte,
+		"bitem":MAP_byte,
+		"mbite":MAP_byte,
+		"bitemap":MAP_byte,
+		"mapbite":MAP_byte,
+
+		"bytes":MAP_bytes,
+		"bytesm":MAP_bytes,
+		"mbytes":MAP_bytes,
+		"bytesmap":MAP_bytes,
+		"mapbytes":MAP_bytes,
+		"bytsmap":MAP_bytes,
+		"bysmap":MAP_bytes,
+		"btsmap":MAP_bytes,
+		"btsm":MAP_bytes,
+		"bts":MAP_bytes,
+
+
+		"bites":MAP_bytes,
+		"bitesm":MAP_bytes,
+		"mbites":MAP_bytes,
+		"bitesmap":MAP_bytes,
+		"mapbites":MAP_bytes,
+
+		"on/off":MAP_bit,
+		"on,off":MAP_bit,
+		"on off":MAP_bit,
+		"on or off":MAP_bit,
+		"cheap":MAP_bit,
+		"white":MAP_bit,
+		"black":MAP_bit,
+		"black and white":MAP_bit,
+		"black white":MAP_bit,
+
+		"intensity":MAP_byte,
+		"intense":MAP_byte,
+		"intst":MAP_byte,
+		"itst":MAP_byte,
+
+		"color":MAP_bytes,
+		"colors":MAP_bytes,
+		"full":MAP_bytes,
+		"colorful":MAP_bytes,
+		"colorfull":MAP_bytes,
+	}
+)
+
 const (
 	HERE = "\x1b[38;2;255;0;0mHERE\x1b[38;2;255;255;255m"
 
