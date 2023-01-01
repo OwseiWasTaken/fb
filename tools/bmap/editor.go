@@ -8,7 +8,11 @@ var col_prt string
 func dbg (scr *Window, format string, stuff ...interface{}) {
 	if format == "\\" {
 		cleardbg(scr)
-		wprint(scr, 1, _dbg_prt_len, spf("%v", stuff[0]))
+		if len(stuff) > 1 {
+			wprint(scr, 1, _dbg_prt_len, spf(stuff[0].(string), stuff[1:]...))
+		} else {
+			wprint(scr, 1, _dbg_prt_len, spf("%v", stuff[0]))
+		}
 	} else {
 		msg := spf(format, stuff...)
 		wprint(scr, 1, _dbg_prt_len, msg)
@@ -37,28 +41,59 @@ func prtpixel(wmap *Window, y, x int, pxmap []pixel) {
 	wwrite(wmap, pxRGB(pxmap[y*(wmap.LenX-1)+x])+"#"+RGB(255,255,255))
 }
 
-func GetInput(scr *Window) (string) {
+func GetInput(scr *Window, prompt string) (string) {
 	var (
 		x int
-		line string
-		//minx = 0
-		//maxx = scr.LenX
+		line []byte
+		k string
 	)
-	line = "uwu"
-	dbg(scr, "\\", line)
-	wmove(scr, 1, x)
-	wgtk(scr)
-	PS()
-	wgtk(scr)
-	return line
+	line = make([]byte, scr.LenX-3)
+	cleardbg(scr)
+	for {
+		wmove(scr, 1, 0)
+		wwrite(scr, prompt)
+		wwrite(scr, string(line))
+		wmove(scr, 1, x+len(prompt))
+		k = wgtk(scr)
+		if len(k) == 1{
+			line[x]=k[0]
+			if x < len(line) {
+				x++
+			}
+		}
+		switch (k) {
+		case "left":
+			if x!=0 { x-- }
+		case "right":
+			if line[x] != 0 { x++ }
+		case "space":
+			line[x]=' '
+			if x < len(line) {
+				x++
+			}
+		case "enter":
+			for i:=0;i<len(line);i++ {
+				if line[i] == 0 {
+					return string(line[:i])
+				}
+			}
+			return string(line)
+		case "backspace":
+			if x!=0 { x-- }
+			var i int
+			for i=x;i<len(line)-2;i++ {
+				line[i] = line[i+1]
+			}
+			line[i+1] = 0
+			cleardbg(scr)
+		}
+	}
 }
 
 func GetMapType(scr *Window) (int) {
-	var line string = GetInput(scr)
-	for id, name := range MapToName {
-		if name == line {
-			return id
-		}
+	var line string = GetInput(scr, "type:")
+	if id, ok:=TextToId[line]; ok {
+		return id
 	}
 	return -1
 }
@@ -163,9 +198,14 @@ func iEdit (mp FlMap, scr *Window) {
 			prtpixel(wmap, y, x, pxmap)
 		case "q":
 			return
-		case "f7":
+		case ":":
+			dbg(wstatus, "\\", "input: "+GetInput(wstatus, ":"))
+		case "f7": // convert info into X map type
 			dbg(wstatus, "\\", "convert image")
-			dbg(wstatus, "\\", mp.GetObj()+" -> "+GetInput(wstatus))
+			dbg(wstatus, "\\", mp.GetObj()+" -> "+GetInput(wstatus, "convert to:"))
+		case "f10": // export as X map type
+			id:=GetMapType(wstatus)
+			dbg(wstatus, "\\", "export to %d", id)
 		}
 	}
 }
