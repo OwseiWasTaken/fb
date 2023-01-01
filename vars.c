@@ -34,7 +34,7 @@ struct fbjar InitFb()
 	screensize = vinfo.xres * vinfo.yres * vinfo.bits_per_pixel / 8;
 	// Map the device to memory
 	fbp = (uint8 *)mmap(0, screensize, PROT_READ | PROT_WRITE, MAP_SHARED, fbfd, 0);
-	if ( *fbp == -1) {
+	if ( *fbp == (uint8)-1) {
 		perror("Error: failed to map framebuffer device to memory");
 		exit(4);
 	}
@@ -123,6 +123,11 @@ inline point MakePoint(const int y, const int x) {
 	return p;
 }
 
+inline upoint MakeuPoint(const uint y, const uint x) {
+	upoint p = {.y = y, .x = x};
+	return p;
+}
+
 inline ppoint MakepPoint(const float y, const float x) {
 	ppoint p = {.y = y, .x = x};
 	return p;
@@ -175,7 +180,7 @@ uint8* GetFbPos ( struct fbjar jar, int y, int x ) {
 }
 
 bool CheckPIJ (struct fbjar jar, point p) {
-	if (p.y >= jar.rows || p.y < 0 || p.x >= jar.cols || p.x < 0) {
+	if ((uint)p.y >= jar.rows || (uint)p.x >= jar.cols) {
 		fprintf( jar.log,
 			"y:%d max: %d, x:%d max: %d\n",
 			p.y, jar.rows, p.x, jar.cols);
@@ -185,8 +190,29 @@ bool CheckPIJ (struct fbjar jar, point p) {
 	return true;
 }
 
-bool CheckInJar (struct fbjar jar, int y, int x) {
-	if (y >= jar.rows || y < 0 || x >= jar.cols || x < 0) {
+// uP for upoint
+bool CheckuPIJ (struct fbjar jar, upoint p) {
+	if (p.y >= jar.rows || p.x >= jar.cols) {
+		fprintf( jar.log,
+			"y:%d max: %d, x:%d max: %d\n",
+			p.y, jar.rows, p.x, jar.cols);
+		fflush(jar.log);
+		return false;
+	}
+	return true;
+}
+
+// ^q for quick
+bool qCheckPIJ (struct fbjar jar, point p) {
+	return !((uint)p.y >= jar.rows || (uint)p.x >= jar.cols);
+}
+
+bool qCheckuPIJ (struct fbjar jar, upoint p) {
+	return !(p.y >= jar.rows || p.x >= jar.cols);
+}
+
+bool CheckInJar (struct fbjar jar, uint y, uint x) {
+	if (y >= jar.rows || x >= jar.cols) {
 		fprintf( jar.log,
 			"y:%d max: %d, x:%d max: %d\n",
 			y, jar.rows, x, jar.cols);
@@ -215,6 +241,7 @@ point SPolarToCoord (polar plr) {
 void SHandleInt( int sig ) {
 	ShowCursor();
 	CloseFb(GlobalJar);
+	printf("kill sig: %d SIGINT\n", sig);
 	exit(129);
 }
 
@@ -343,23 +370,23 @@ bytemap LoadBytemap(char *pathname) {
 	FILE *rd = fopen(pathname, "r");
 
 	// size of width, width array
-	int szh = 0, szw = 0;
+	uint szh = 0, szw = 0;
 	ssize_t w = 0, h = 0;
 	{
-		szh = (int)getc(rd);
-		assert(szh < sizeof(ssize_t));
+		szh = (uint)getc(rd);
+		assert(szh < (uint)sizeof(ssize_t));
 		// decresent
 		byte ha[szh];
-		for (int i = 0; i<szh; i++)  {
+		for (uint i = 0; i<szh; i++)  {
 			ha[i] = (byte)getc(rd);
 		}
 
 
-		szw = (int)getc(rd);
-		assert(szw < sizeof(ssize_t));
+		szw = (uint)getc(rd);
+		assert(szw < (uint)sizeof(ssize_t));
 		// decresent
 		byte wa[szw];
-		for (int i = 0; i<szw; i++)  {
+		for (uint i = 0; i<szw; i++)  {
 			wa[i] = (byte)getc(rd);
 		}
 
@@ -367,11 +394,11 @@ bytemap LoadBytemap(char *pathname) {
 		//read(rfd, cont, w*h);
 
 		//TODO test this
-		for (int i = 0; i<szh; i++) {
-			h = 255*h+(byte)ha[i];
+		for (uint i = 0; i<szh; i++) {
+			h = 255*h+ha[i];
 		}
-		for (int i = 0; i<szw; i++) {
-			w = 255*w+(byte)wa[i];
+		for (uint i = 0; i<szw; i++) {
+			w = 255*w+wa[i];
 		}
 	}
 	byte cont[h*w];
