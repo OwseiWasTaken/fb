@@ -45,10 +45,6 @@ struct fbjar {
 	char* tty;
 };
 
-typedef struct {
-	float a, r;
-} polar;
-
 // one byte for 8 pixels
 // one bit for each
 // only control is on/off
