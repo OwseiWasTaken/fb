@@ -221,7 +221,7 @@ inline point GetpDistance(const point a, const point b) {
 	);
 }
 
-inline point GetPointByLineSeg (line l, float seg) {
+inline point GetPILSeg (line l, float seg) {
 	point dist = GetpDistance(l.a, l.b);
 	long double y = (float)dist.y / 100.0 * seg;
 	long double x = (float)dist.x / 100.0 * seg;
