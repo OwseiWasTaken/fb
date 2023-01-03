@@ -1,13 +1,15 @@
 #ifndef BUFFY
 #define BUFFY
 
+// frame buffer header
+#include <linux/fb.h>
+
 // cUtil https://github.com/owseiwastaken/cutil
 #include "cutil.h"
 // fb
 #include <sys/types.h>
 #include <sys/ioctl.h>
 #include <sys/mman.h>
-#include <linux/fb.h>
 // work
 #include <stdlib.h>
 #include <stdio.h>
@@ -69,6 +71,10 @@ typedef struct {
 	color* cont;
 	uint heigth, width;
 } bytesmap;
+
+typedef struct {
+	point a, b;
+} line;
 
 // global jar
 struct fbjar GlobalJar;
