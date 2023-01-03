@@ -1,10 +1,13 @@
 //funcs
 
+void _P_point (point p) {
+	printf("y:%i, x:%i\n", p.y, p.x);
+}
+
 //TODO: can't write to the end of the screen
 // last 8 lines can't be used
 
-// tbh no idea how this works
-// but it works
+// specific interact
 struct fbjar InitFb()
 {
 	int fbfd = 0;
@@ -15,18 +18,18 @@ struct fbjar InitFb()
 	// Open the file for reading and writing
 	fbfd = open("/dev/fb0", O_RDWR);
 	if (fbfd == -1) {
-		perror("Error: cannot open framebuffer device");
+		perror("InitFb: cannot open framebuffer device");
 		exit(1);
 	}
 	//printf("The framebuffer device was opened successfully.\n");
 	// Get fixed screen information
 	if (ioctl(fbfd, FBIOGET_FSCREENINFO, &finfo) == -1) {
-		perror("Error reading fixed information");
+		perror("InitFb: can't read fixed information");
 		exit(2);
 	}
 	// Get variable screen information
 	if (ioctl(fbfd, FBIOGET_VSCREENINFO, &vinfo) == -1) {
-		perror("Error reading variable information");
+		perror("InitFb: can't read variable information");
 		exit(3);
 	}
 	//printf("%dx%d, %dbpp\n", vinfo.xres, vinfo.yres, vinfo.bits_per_pixel);
@@ -35,10 +38,10 @@ struct fbjar InitFb()
 	// Map the device to memory
 	fbp = (uint8 *)mmap(0, screensize, PROT_READ | PROT_WRITE, MAP_SHARED, fbfd, 0);
 	if ( *fbp == (uint8)-1) {
-		perror("Error: failed to map framebuffer device to memory");
+		perror("InitFb: failed to map framebuffer device to memory");
 		exit(4);
 	}
-	
+
 	struct fbjar jar = {
 		.fd = fbfd,
 		.fbmem = fbp,
@@ -47,8 +50,8 @@ struct fbjar InitFb()
 		.yoff = vinfo.yoffset*vinfo.bits_per_pixel/8,
 		.skip = finfo.line_length,// from y to y+1
 		.screensize = screensize,
-		.rows = (screensize/finfo.line_length)-1,
-		.cols = (finfo.line_length/(vinfo.bits_per_pixel/8))-10,
+		.rows = screensize / finfo.line_length,
+		.cols = finfo.line_length/(vinfo.bits_per_pixel/8),
 		.tty = ttyname(STDIN_FILENO),
 		.log = fopen("/tmp/buffy.log", "w")
 	};
@@ -110,6 +113,14 @@ void CloseFb(struct fbjar jar) {
 	close(jar.fd);
 }
 
+void SHandleInt( int sig ) {
+	ShowCursor();
+	CloseFb(GlobalJar);
+	printf("kill sig: %d SIGINT\n", sig);
+	exit(129);
+}
+
+// easy interact
 void StopBuffy(struct fbjar jar) {
 	if (GlobalJar.tty != NULL){
 		CloseFb(GlobalJar);
@@ -118,6 +129,19 @@ void StopBuffy(struct fbjar jar) {
 	}
 }
 
+struct fbjar InitBuffy() {
+	struct sigaction act;
+	act.sa_handler = SHandleInt;
+	sigaction(SIGINT, &act, NULL);
+	struct fbjar jar = InitFb();
+	fprintf(jar.log, "fb size: line cols:%d, rows: %d\n", jar.cols-1, jar.rows-1);
+	fprintf(jar.log, "tty: %s\n", jar.tty);
+	//uint8* chars = ReadChars(1);
+	//fprintf(jar.log, "chars loaded from 'draw/font'\n");
+	return jar;
+}
+
+// make
 inline point MakePoint(const int y, const int x) {
 	point p = {.y = y, .x = x};
 	return p;
@@ -138,6 +162,17 @@ inline point pMakePoint(const ppoint p) {
 	return r;
 }
 
+inline line MakeLine(const point a, const point b) {
+	line r = {.a = a, .b = b};
+	return r;
+}
+
+inline polar MakePolar(const float r, const float a) {
+	polar p = {.r = r, .a = a};
+	return p;
+}
+
+// move
 point MovePoint(const point p, const int y, const int x) {
 	point r = {.y = p.y+y, .x = p.x+x};
 	return r;
@@ -158,9 +193,39 @@ ppoint ppMovepPoint(const ppoint p, const ppoint d /*diff*/ ) {
 	return r;
 }
 
-inline polar MakePolar(const float r, const float a) {
-	polar p = {.r = r, .a = a};
+// get
+point pMul(point p, int m) {
+	p.x = p.x*m;
+	p.y = p.y*m;
 	return p;
+}
+
+point pDiv(point p, int d) {
+	p.x = p.x/d;
+	p.y = p.y/d;
+	return p;
+}
+
+inline float GetDistance(const point a, const point b) {
+	return sqrt(
+		isquare(abs(a.y-b.y))
+		+
+		isquare(abs(a.x-b.x))
+	);
+}
+
+inline point GetpDistance(const point a, const point b) {
+	return MakePoint(
+		abs(a.y-b.y),
+		abs(a.x-b.x)
+	);
+}
+
+inline point GetPointByLineSeg (line l, float seg) {
+	point dist = GetpDistance(l.a, l.b);
+	long double y = (float)dist.y / 100.0 * seg;
+	long double x = (float)dist.x / 100.0 * seg;
+	return MakePoint((int)y+l.a.y, (int)x+l.a.x);
 }
 
 long int GetPixelPos ( struct fbjar jar, int y, int x ) {
@@ -172,12 +237,23 @@ long int GetPixelPnt ( struct fbjar jar, point p ) {
 }
 
 uint8* GetFbPnt ( struct fbjar jar, point p ) {
-	return jar.fbmem+((p.y+jar.yoff)*jar.skip + (jar.xoff+p.x)*jar.bpp);
+	return jar.fbmem + (p.y+jar.yoff)*jar.skip + (jar.xoff+p.x)*jar.bpp;
 }
 
 uint8* GetFbPos ( struct fbjar jar, int y, int x ) {
-	return jar.fbmem+((y+jar.yoff)*jar.skip + (jar.xoff+x)*jar.bpp);
+	return jar.fbmem + (y+jar.yoff)*jar.skip + (jar.xoff+x)*jar.bpp;
 }
+
+// cheks
+bool PInP(point top, point bot, point check) {
+	return (
+		top.y < check.y &&
+		bot.y > check.y &&
+		top.x < check.x &&
+		bot.x > check.x
+	);
+}
+
 
 bool CheckPIJ (struct fbjar jar, point p) {
 	if ((uint)p.y >= jar.rows || (uint)p.x >= jar.cols) {
@@ -222,6 +298,7 @@ bool CheckInJar (struct fbjar jar, uint y, uint x) {
 	return true;
 }
 
+// transform
 ppoint PolarToCoord (polar plr) {
 	ppoint pnt;
 	float a = plr.a*(PI/180);
@@ -236,34 +313,6 @@ point SPolarToCoord (polar plr) {
 	pnt.x = plr.r*cos(a);
 	pnt.y = plr.r*sin(a);
 	return pnt;
-}
-
-void SHandleInt( int sig ) {
-	ShowCursor();
-	CloseFb(GlobalJar);
-	printf("kill sig: %d SIGINT\n", sig);
-	exit(129);
-}
-
-struct fbjar InitBuffy() {
-	struct sigaction act;
-	act.sa_handler = SHandleInt;
-	sigaction(SIGINT, &act, NULL);
-	struct fbjar jar = InitFb();
-	fprintf(jar.log, "fb size: line cols:%d, rows: %d\n", jar.cols-1, jar.rows-1);
-	fprintf(jar.log, "tty: %s\n", jar.tty);
-	//uint8* chars = ReadChars(1);
-	//fprintf(jar.log, "chars loaded from 'draw/font'\n");
-	return jar;
-}
-
-bool PInP(point top, point bot, point check) {
-	return (
-		top.y < check.y &&
-		bot.y > check.y &&
-		top.x < check.x &&
-		bot.x > check.x
-	);
 }
 
 void UpdateBuffer(struct fbjar jar, uint8* newbuff) {
@@ -413,4 +462,3 @@ bytemap LoadBytemap(char *pathname) {
 
 	return b;
 }
-
