@@ -6,6 +6,7 @@
 
 int main(int argc, char* argv[]){
 	struct fbjar jar = InitBuffy();
+	printf("%s%d\n", argv[0], argc);
 	int mice = open("/dev/input/mice", O_RDONLY);
 	assert(mice != -1);
 	printf("reading mouse from fd%d\n", mice);
@@ -25,6 +26,7 @@ int main(int argc, char* argv[]){
 	};
 	PutBytesInBitmap(&b, cont);
 	color green = RGB(0,255,0);
+	color black = RGB(0,0,0);
 	point loc = MakePoint(100, 100);
 
 	uint8 buff[3] = {0};
@@ -54,6 +56,7 @@ int main(int argc, char* argv[]){
 				printf("pressed middle button @ %d,%d\n", loc.y, loc.x);
 			}
 
+			ApplyBitmap(jar, b, loc, black);
 			loc.y-=ry;
 			loc.x+=rx;
 			ApplyBitmap(jar, b, loc, green);
