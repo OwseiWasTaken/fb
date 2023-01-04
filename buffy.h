@@ -29,9 +29,9 @@
 // written char width in pixels
 #define CHARLINELEN 8
 
-#define CHAN_R 0b100
-#define CHAN_G 0b010
-#define CHAN_B 0b001
+#define CHAN_R 4 // 0b100
+#define CHAN_G 2 // 0b010
+#define CHAN_B 1 // 0b001
 
 
 // complex defs
@@ -76,23 +76,26 @@ typedef struct {
 	point a, b;
 } line;
 
+typedef struct {
+	ppoint a, b;
+} pline;
+
 // global jar
 struct fbjar GlobalJar;
 
 #include "vars.c"
 
 
-// include drawers
 // func naming [(S)imple][(T)hick,(K)eep,(R)elative](Draw,Apply,Fill)
 // var naming
 // points
 // top = < bot
 // bot = > top
 // len = bot-top (for (R)elative funcs)
+// include drawers
 #include "draw/simple.c"
 #include "draw/normal.c"
 #include "draw/complex.c"
 #include "draw/chars.c"
 
-#endif
-
+#endif // BUFFY
