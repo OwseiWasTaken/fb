@@ -22,12 +22,12 @@ struct fbjar InitFb()
 		exit(1);
 	}
 	//printf("The framebuffer device was opened successfully.\n");
-	// Get fixed screen information
+	// read  fixed screen information
 	if (ioctl(fbfd, FBIOGET_FSCREENINFO, &finfo) == -1) {
 		perror("InitFb: can't read fixed information");
 		exit(2);
 	}
-	// Get variable screen information
+	//  variable screen information
 	if (ioctl(fbfd, FBIOGET_VSCREENINFO, &vinfo) == -1) {
 		perror("InitFb: can't read variable information");
 		exit(3);
@@ -74,12 +74,12 @@ struct fbjar InitMemJar () {
 		exit(1);
 	}
 	//printf("The framebuffer device was opened successfully.\n");
-	// Get fixed screen information
+	// read fixed screen information
 	if (ioctl(fbfd, FBIOGET_FSCREENINFO, &finfo) == -1) {
 		perror("Error reading fixed information");
 		exit(2);
 	}
-	// Get variable screen information
+	// read  variable screen information
 	if (ioctl(fbfd, FBIOGET_VSCREENINFO, &vinfo) == -1) {
 		perror("Error reading variable information");
 		exit(3);
@@ -89,8 +89,10 @@ struct fbjar InitMemJar () {
 	screensize = vinfo.xres * vinfo.yres * vinfo.bits_per_pixel / 8;
 	// Map the device to memory
 	fbp = malloc(screensize);
+
+	close(fbfd);
 	struct fbjar jar = {
-		.fd = fbfd,
+		.fd = -1,
 		.fbmem = fbp,
 		.bpp = vinfo.bits_per_pixel/8,
 		.xoff = vinfo.xoffset*vinfo.bits_per_pixel/8,
@@ -100,7 +102,7 @@ struct fbjar InitMemJar () {
 		.rows = (screensize/finfo.line_length)-1,
 		.cols = (finfo.line_length/(vinfo.bits_per_pixel/8))-10,
 		.tty = ttyname(STDIN_FILENO),
-		.log = fopen("/tmp/buffy.log", "w")
+		.log = fopen("/tmp/membuffy.log", "w")
 	};
 	return jar;
 }
@@ -142,32 +144,47 @@ struct fbjar InitBuffy() {
 }
 
 // make
-inline point MakePoint(const int y, const int x) {
+point MakePoint(const int y, const int x) {
 	point p = {.y = y, .x = x};
 	return p;
 }
 
-inline upoint MakeuPoint(const uint y, const uint x) {
+upoint MakeuPoint(const uint y, const uint x) {
 	upoint p = {.y = y, .x = x};
 	return p;
 }
 
-inline ppoint MakepPoint(const float y, const float x) {
+ppoint MakepPoint(const lfloat y, const lfloat x) {
 	ppoint p = {.y = y, .x = x};
 	return p;
 }
 
-inline point pMakePoint(const ppoint p) {
+point pMakePoint(const ppoint p) {
 	point r = {.y = (int)p.y, .x = (int)p.x};
 	return r;
 }
 
-inline line MakeLine(const point a, const point b) {
+line MakeLine(const point a, const point b) {
 	line r = {.a = a, .b = b};
 	return r;
 }
 
-inline polar MakePolar(const float r, const float a) {
+pline MakepLine(const ppoint a, const ppoint b) {
+	pline r = {.a = a, .b = b};
+	return r;
+}
+
+line pMakeLine(const ppoint a, const ppoint b) {
+	line r = {.a = pMakePoint(a), .b = pMakePoint(b)};
+	return r;
+}
+
+//pline lMakepLine(const pline l) {
+//	pline r = {.a = pMakePoint(l.a), .b = pMakePoint(l.b)};
+//	return r;
+//}
+
+polar MakePolar(const float r, const float a) {
 	polar p = {.r = r, .a = a};
 	return p;
 }
@@ -184,7 +201,7 @@ point pMovePoint(const point p, const point d /*diff*/ ) {
 }
 
 ppoint pMovepPoint(const ppoint p, const point d /*diff*/ ) {
-	ppoint r = {.y = p.y+(float)d.y, .x = p.x+(float)d.x};
+	ppoint r = {.y = p.y+(lfloat)d.y, .x = p.x+(lfloat)d.x};
 	return r;
 }
 
@@ -193,7 +210,7 @@ ppoint ppMovepPoint(const ppoint p, const ppoint d /*diff*/ ) {
 	return r;
 }
 
-// get
+// transform
 point pMul(point p, int m) {
 	p.x = p.x*m;
 	p.y = p.y*m;
@@ -206,11 +223,68 @@ point pDiv(point p, int d) {
 	return p;
 }
 
+point pAdd(point p, int a) {
+	p.x = p.x+a;
+	p.y = p.y+a;
+	return p;
+}
+
+point pSub(point p, int s) {
+	p.x = p.x-s;
+	p.y = p.y-s;
+	return p;
+}
+
+ppoint PolarToCoord (polar plr) {
+	ppoint pnt;
+	lfloat a = plr.a*(PI/180);
+	pnt.x = plr.r*cos(a);
+	pnt.y = plr.r*sin(a);
+	return pnt;
+}
+
+point SPolarToCoord (polar plr) {
+	point pnt;
+	float a = plr.a*(PI/180);
+	pnt.x = plr.r*cos(a);
+	pnt.y = plr.r*sin(a);
+	return pnt;
+}
+
+// lfloat = more precision than float
+// distance from path a -> b, @ p% walked
+inline lfloat lerp(lfloat a, lfloat b, lfloat p) { // p = 0..1
+	return a * (1-p) + (b*p);
+}
+
+// get
+
+inline ppoint D1PointLerp(point a, point b, lfloat t) { // t as in time
+	return MakepPoint(
+		lerp(a.y, b.y, t),
+		lerp(a.x, b.x, t)
+	);
+}
+
+inline ppoint D1LineLerp(line l, lfloat t) { // t as in time
+	return MakepPoint(
+		lerp(l.a.y, l.b.y, t),
+		lerp(l.a.x, l.b.x, t)
+	);
+}
+
+inline ppoint D1pLineLerp(pline l, lfloat t) { // t as in time
+	return MakepPoint(
+		lerp(l.a.y, l.b.y, t),
+		lerp(l.a.x, l.b.x, t)
+	);
+}
+
 inline float GetDistance(const point a, const point b) {
 	return sqrt(
-		isquare(abs(a.y-b.y))
+		isquare(a.y-b.y)
 		+
-		isquare(abs(a.x-b.x))
+		isquare(a.x-b.x)
 	);
 }
 
@@ -221,11 +295,21 @@ inline point GetpDistance(const point a, const point b) {
 	);
 }
 
+// can also be used to expand a line (if seg > 100)
 inline point GetPILSeg (line l, float seg) {
 	point dist = GetpDistance(l.a, l.b);
 	long double y = (float)dist.y / 100.0 * seg;
 	long double x = (float)dist.x / 100.0 * seg;
 	return MakePoint((int)y+l.a.y, (int)x+l.a.x);
+}
+
+inline point GetRayCast(const line l, const int expand) {
+	return GetPILSeg(l, (float)expand+100);
+}
+
+inline line RayCast(line l, const int expand) {
+	l.b = GetPILSeg(l, (float)expand+100);
+	return l;
 }
 
 long int GetPixelPos ( struct fbjar jar, int y, int x ) {
@@ -296,23 +380,6 @@ bool CheckInJar (struct fbjar jar, uint y, uint x) {
 		return false;
 	}
 	return true;
-}
-
-// transform
-ppoint PolarToCoord (polar plr) {
-	ppoint pnt;
-	float a = plr.a*(PI/180);
-	pnt.x = plr.r*cos(a);
-	pnt.y = plr.r*sin(a);
-	return pnt;
-}
-
-point SPolarToCoord (polar plr) {
-	point pnt;
-	float a = plr.a*(PI/180);
-	pnt.x = plr.r*cos(a);
-	pnt.y = plr.r*sin(a);
-	return pnt;
 }
 
 void UpdateBuffer(struct fbjar jar, uint8* newbuff) {
