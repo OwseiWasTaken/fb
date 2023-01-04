@@ -1,8 +1,9 @@
-#include "./buffy.h"
+#include "buffy.h"
 //TODO: dynamic
 #define UTFDIFF -3
 
 int main ( int argc, char** argv ) {
+	HideCursor();
 	struct fbjar jar = InitBuffy();
 
 	bool debug = false;
@@ -18,6 +19,8 @@ int main ( int argc, char** argv ) {
 			digital = true;
 		} else if (!strcmp(argv[i], "-d")) {
 			digital = true;
+		} else if (!strcmp(argv[i], "--loop")) {
+			ShowCursor();
 		} else if (!strcmp(argv[i], "-r")) {
 			i++;
 			assert(i < argc); // read radius size
@@ -47,7 +50,6 @@ int main ( int argc, char** argv ) {
 		}
 	}
 	
-	HideCursor();
 	x+=MaxR;
 	y+=MaxR;
 
