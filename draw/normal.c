@@ -315,9 +315,9 @@ void DrawBytemap (struct fbjar jar, bytemap bmap, point top, uint chan) {
 	uint chanb, chang, chanr;
 
 	// direct info into correct chan or alpha chan
-	chanr = (chan&0b100)>>2?2:3;
-	chang = (chan&0b010)>>1?1:3;
-	chanb = (chan&0b001)>>0?0:3;
+	chanr = (chan&CHAN_R)>>2?2:3;
+	chang = (chan&CHAN_G)>>1?1:3;
+	chanb = (chan&CHAN_B)>>0?0:3;
 
 	for (uint i = 0 ; i<(bmap.heigth); i++) {
 		for (uint j = 0 ; j<(bmap.width) ; j++) {
@@ -334,9 +334,9 @@ void DrawBytemap (struct fbjar jar, bytemap bmap, point top, uint chan) {
 void ApplyBytemap (struct fbjar jar, bytemap bmap, point top, uint chan) {
 	uint8* location = GetFbPos(jar, top.y, top.x);
 	uint chanb, chang, chanr;
-	chanr = (chan&0b100)>>2?2:3;
-	chang = (chan&0b010)>>1?1:3;
-	chanb = (chan&0b001)>>0?0:3;
+	chanr = (chan&CHAN_R)>>2?2:3;
+	chang = (chan&CHAN_G)>>1?1:3;
+	chanb = (chan&CHAN_B)>>0?0:3;
 	for (uint i = 0 ; i<(bmap.heigth); i++) {
 		for (uint j = 0 ; j<(bmap.width) ; j++) {
 			if (bmap.cont[i*bmap.width+j]) {
@@ -358,4 +358,15 @@ void DrawPoint (struct fbjar jar, point at, color col) {
 	location[0] = col.B;
 	location[1] = col.G;
 	location[2] = col.R;
+}
+
+void DrawpPoint (struct fbjar jar, ppoint at, color col) {
+	DrawPoint(jar, pMakePoint(at), col);
+}
+
+// precision = how many pixels will be drawn (p+1)
+void DrawLine(struct fbjar jar, line l, lfloat p, color col) {
+	for (lfloat t = 0; t < 1.01; t+=1/p) {
+		DrawPoint(jar, pMakePoint(D1LineLerp(l, t)), col);
+	}
 }

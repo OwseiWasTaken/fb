@@ -73,7 +73,7 @@ void SRFillRectangle (
 ) {
 	assert(CheckInJar(jar, bot.y+top.y, bot.x+top.x));
 	assert(CheckPIJ(jar, top));
-	uint8* location = GetFbPos(jar, top.y, top.x);
+	uint8* location = GetFbPnt(jar, top);
 	uint limy = (uint)bot.y*jar.skip;
 	uint limx = (uint)bot.x*jar.bpp;
 
@@ -88,7 +88,7 @@ void SFillRectangle (
 ) {
 	assert(CheckPIJ(jar, top));
 	assert(CheckPIJ(jar, bot));
-	uint8* location = GetFbPos(jar, top.y, top.x);
+	uint8* location = GetFbPnt(jar, top);
 	uint limy = (uint)(top.y-bot.y)*jar.skip;
 	uint limx = (uint)(top.x-bot.x)*jar.bpp;
 	for (uint i = 0; i < limy ; i+=jar.skip ) {
@@ -119,7 +119,7 @@ void SDrawCircle (
 	assert(CheckPIJ(jar, bot));
 	assert(CheckPIJ(jar, top));
 
-	uint8* location = GetFbPos(jar, top.y, top.x);
+	uint8* location = GetFbPnt(jar, top);
 	int sr = -(r*r);
 
 	for (int y = -r ; y<bot.y ; y++) {
@@ -144,7 +144,7 @@ void SFillCircle (
 	assert(CheckPIJ(jar, bot));
 	assert(CheckPIJ(jar, top));
 
-	uint8* location = GetFbPos(jar, top.y, top.x);
+	uint8* location = GetFbPnt(jar, top);
 	int sr = -(r*r);
 
 	for (int y = -r ; y<bot.y ; y++) {
@@ -164,7 +164,7 @@ void SDrawBitmap (struct fbjar jar, bitmap bmap, point top) {
 	//TODO make map funcs safe
 	//assert(CheckPIJ(jar, bot));
 
-	uint8* location = GetFbPos(jar, top.y, top.x);
+	uint8* location = GetFbPnt(jar, top);
 	for (uint i = 0 ; i<(bmap.heigth); i++) {
 		for (uint j = 0 ; j<(bmap.width) ; j++) {
 			location[0] = bmap.cont[i*bmap.width+j]*255;
@@ -179,7 +179,7 @@ void SDrawBitmap (struct fbjar jar, bitmap bmap, point top) {
 
 //unsanfe
 void SApplyBitmap (struct fbjar jar, bitmap bmap, point top) {
-	uint8* location = GetFbPos(jar, top.y, top.x);
+	uint8* location = GetFbPnt(jar, top);
 	for (uint i = 0 ; i<(bmap.heigth); i++) {
 		for (uint j = 0 ; j<(bmap.width) ; j++) {
 			if (bmap.cont[i*bmap.width+j]) {
@@ -196,7 +196,7 @@ void SApplyBitmap (struct fbjar jar, bitmap bmap, point top) {
 
 //unsanfe
 void SDrawBytemap (struct fbjar jar, bytemap bmap, point top) {
-	uint8* location = GetFbPos(jar, top.y, top.x);
+	uint8* location = GetFbPnt(jar, top);
 	for (uint i = 0 ; i<(bmap.heigth); i++) {
 		for (uint j = 0 ; j<(bmap.width) ; j++) {
 			location[0] = bmap.cont[0];
@@ -212,7 +212,7 @@ void SDrawBytemap (struct fbjar jar, bytemap bmap, point top) {
 
 //unsanfe
 void SApplyBytemap (struct fbjar jar, bytemap bmap, point top) {
-	uint8* location = GetFbPos(jar, top.y, top.x);
+	uint8* location = GetFbPnt(jar, top);
 	for (uint i = 0 ; i<(bmap.heigth); i++) {
 		for (uint j = 0 ; j<(bmap.width) ; j++) {
 			if (bmap.cont[i*bmap.width+j]) {
@@ -230,8 +230,19 @@ void SApplyBytemap (struct fbjar jar, bytemap bmap, point top) {
 void SDrawPoint (struct fbjar jar, point at) {
 	assert(CheckPIJ(jar, at));
 
-	uint8* location = GetFbPos(jar, at.y, at.x);
+	uint8* location = GetFbPnt(jar, at);
 	location[0] = 255;
 	location[1] = 255;
 	location[2] = 255;
+}
+
+void SDrawpPoint (struct fbjar jar, ppoint at) {
+	SDrawPoint(jar, pMakePoint(at));
+}
+
+// precision = how many pixels (+1)
+void SDrawLine(struct fbjar jar, line l, lfloat p) {
+	for (lfloat t = 0; t < 1.01; t+=1/p) {
+		SDrawPoint(jar, pMakePoint(D1LineLerp(l, t)));
+	}
 }
