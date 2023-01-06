@@ -22,42 +22,50 @@ inline ppoint D2LineLerp(point spot[], lfloat t) {
 	) , t);
 }
 
+inline ppoint BezierTriangleLerp(triangle tri, lfloat t) {
+	return D1pLineLerp(
+	MakepLine(
+		D1PointLerp(tri.a, tri.b, t),
+		D1PointLerp(tri.b, tri.c, t)
+	) , t);
+}
+
 int main(int argc, char *argv[]) {
 	struct fbjar jar = InitBuffy();
 
 	printf("%d%s\n", argc, *argv);
 	color pink = RGB(255,128,128);
 
-	point tr[] = {
-		MakePoint(100+ 000,100+ 200),
-		MakePoint(100+ 200,100+ 200),
-		MakePoint(100+ 200,100+ 400)
-	};
+	triangle tr = MakeTriangle(
+		MakePoint(300+ 00,600+ 20),
+		MakePoint(300+ 20,600+ 20),
+		MakePoint(300+ 20,600+ 40)
+	);
 	point tl[] = {
-		MakePoint(100+ 200,100+ 000),
-		MakePoint(100+ 200,100+ 200),
-		MakePoint(100+ 000,100+ 200)
+		MakePoint(300+ 20,600+ 00),
+		MakePoint(300+ 20,600+ 20),
+		MakePoint(300+ 00,600+ 20)
 	};
 	point bl[] = {
-		MakePoint(100+ 400,100+ 200),
-		MakePoint(100+ 200,100+ 200),
-		MakePoint(100+ 200,100+ 000)
+		MakePoint(300+ 40,600+ 20),
+		MakePoint(300+ 20,600+ 20),
+		MakePoint(300+ 20,600+ 00)
 	};
 	point br[] = {
-		MakePoint(100+ 200,100+ 400),
-		MakePoint(100+ 200,100+ 200),
-		MakePoint(100+ 400,100+ 200),
+		MakePoint(300+ 20,600+ 40),
+		MakePoint(300+ 20,600+ 20),
+		MakePoint(300+ 40,600+ 20),
 	};
 
 	lfloat p = 600;
 
-	for (lfloat t = 0.0f; t < 1.01; t+=1/p) {
-		DrawpPoint(jar, D2LineLerp(tr, t), pink);
+	for (lfloat t = 0.0f; t < 3; t+=1/p) {
+		DrawpPoint(jar, BezierTriangleLerp(tr, t), pink);
 		DrawpPoint(jar, D2LineLerp(tl, t), pink);
 		DrawpPoint(jar, D2LineLerp(bl, t), pink);
 		DrawpPoint(jar, D2LineLerp(br, t), pink);
 
-		usleep(8000);
+		usleep(3000);
 	}
 
 	StopBuffy(jar);
