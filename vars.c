@@ -4,12 +4,57 @@ void _P_point (point p) {
 	printf("y:%i, x:%i\n", p.y, p.x);
 }
 
+void _P_line (line l) {
+	printf("%i,%i -> %i,%i\n", l.a.y, l.a.x, l.b.y, l.b.x);
+}
+
+void _P_triangle (triangle t) {
+	printf("%i,%i; %i,%i; %i,%i\n",
+		t.a.y, t.a.x,
+		t.b.y, t.b.x,
+		t.c.y, t.c.x
+	);
+}
+
+void _P_quad (quad q) {
+	printf("%i,%i; %i,%i; %i,%i; %i,%i\n",
+		q.a.y, q.a.x,
+		q.b.y, q.b.x,
+		q.d.y, q.d.x,
+		q.c.y, q.c.x
+	);
+}
+
+void _P_ppoint (ppoint p) {
+	printf("%Lf,%Lf\n", p.y, p.x);
+}
+
+void _P_pline (pline l) {
+	printf("%Lf,%Lf -> %Lf,%Lf\n", l.a.y, l.a.x, l.b.y, l.b.x);
+}
+
+void _P_ptriangle (ptriangle t) {
+	printf("%Lf,%Lf; %Lf,%Lf; %Lf,%Lf\n",
+		t.a.y, t.a.x,
+		t.b.y, t.b.x,
+		t.c.y, t.c.x
+	);
+}
+
+void _P_pquad (pquad q) {
+	printf("%Lf,%Lf; %Lf,%Lf; %Lf,%Lf; %Lf,%Lf\n",
+		q.a.y, q.a.x,
+		q.b.y, q.b.x,
+		q.d.y, q.d.x,
+		q.c.y, q.c.x
+	);
+}
+
 //TODO: can't write to the end of the screen
 // last 8 lines can't be used
 
 // specific interact
-struct fbjar InitFb()
-{
+struct fbjar InitFb() {
 	int fbfd = 0;
 	uint8 *fbp = 0;
 	long int screensize = 0;
@@ -50,8 +95,8 @@ struct fbjar InitFb()
 		.yoff = vinfo.yoffset*vinfo.bits_per_pixel/8,
 		.skip = finfo.line_length,// from y to y+1
 		.screensize = screensize,
-		.rows = screensize / finfo.line_length,
-		.cols = finfo.line_length/(vinfo.bits_per_pixel/8),
+		.rows = (screensize / finfo.line_length),
+		.cols = finfo.line_length/(vinfo.bits_per_pixel/8)-10,
 		.tty = ttyname(STDIN_FILENO),
 		.log = fopen("/tmp/buffy.log", "w")
 	};
@@ -159,8 +204,13 @@ ppoint MakepPoint(const lfloat y, const lfloat x) {
 	return p;
 }
 
+ppoint pMakepPoint(const point p) {
+	ppoint r = {.y = (lfloat)p.y, .x = (lfloat)p.x};
+	return r;
+}
+
 point pMakePoint(const ppoint p) {
-	point r = {.y = (int)p.y, .x = (int)p.x};
+	point r = {.y = (int)lroundl(p.y), .x = (int)lroundl(p.x)};
 	return r;
 }
 
@@ -189,6 +239,17 @@ polar MakePolar(const float r, const float a) {
 	return p;
 }
 
+triangle MakeTriangle(const point a, const point b, const point c) {
+	triangle t = {.a = a, .b = b, .c = c};
+	return t;
+}
+
+triangle MakeSTriangle(const point a, const point b, const point c) {
+	triangle t = {.a = a, .b = b, .c = c};
+	SSortTriangle(&t);
+	return t;
+}
+
 // move
 point MovePoint(const point p, const int y, const int x) {
 	point r = {.y = p.y+y, .x = p.x+x};
@@ -210,6 +271,148 @@ ppoint ppMovepPoint(const ppoint p, const ppoint d /*diff*/ ) {
 	return r;
 }
 
+line LineSwap(line l) {
+	point t = l.b;
+	l.b = l.a;
+	l.a = t;
+	return l;
+}
+
+line ExpandLine(line l, lfloat b) {
+	l.b = pMakePoint(D1LineLerp(l, 1+b));
+	return l;
+}
+
+line RevExpandLine(line l, lfloat b) {
+	l = LineSwap(l);
+	l.b = pMakePoint(D1LineLerp(l, 1+b));
+	l = LineSwap(l);
+	return l;
+}
+
+// compact line (line.b = lerp p < 1)
+// move triangle
+// rotate triangle (rotate matrix?)
+// move quad
+
+point plMakePoint (polar plr) {
+	point pnt;
+	float a = plr.a*(PI/180);
+	pnt.x = plr.r*cos(a);
+	pnt.y = plr.r*sin(a);
+	return pnt;
+}
+
+ppoint plMakepPoint (polar plr) {
+	ppoint pnt;
+	float a = plr.a*(PI/180);
+	pnt.x = plr.r*cos(a);
+	pnt.y = plr.r*sin(a);
+	return pnt;
+}
+
+// top = point closest to 0,0
+point GetTriangleTop(triangle tri) {
+	point zz = MakePoint(0,0);
+	point top = tri.a;
+
+	if (GetDistance(tri.b, zz) < GetDistance(top, zz)) {
+		top = tri.b;
+	}
+	if (GetDistance(tri.c, zz) < GetDistance(top, zz)) {
+		top = tri.c;
+	}
+	return top;
+}
+
+// bot = point furthest to 0,0
+point GetTriangleBot(triangle tri) {
+	point zz = MakePoint(0,0);
+	point bot = tri.a;
+
+	if (GetDistance(tri.b, zz) < GetDistance(bot, zz)) {
+		bot = tri.b;
+	}
+	if (GetDistance(tri.c, zz) < GetDistance(bot, zz)) {
+		bot = tri.c;
+	}
+	return bot;
+}
+
+point GetTriangleCont(triangle tri) {
+	if (!pEq(tri.a, GetTriangleTop(tri)) || !pEq(tri.a, GetTriangleBot(tri))) 
+		return tri.a;
+	if (!pEq(tri.b, GetTriangleTop(tri)) || !pEq(tri.b, GetTriangleBot(tri))) 
+		return tri.b;
+	return tri.c;
+}
+
+// TODO: SortTriangle GetTriangleCont uses info from the other funcs
+// optmize that by storing these value instead of running them
+// top, cont, bot
+void SortTriangle(triangle tri, point *dest) {
+	dest[0] = tri.a;
+	dest[1] = tri.b;
+	dest[2] = tri.c;
+	// dest[0,1] = sort(a, b)
+	if (pGt(tri.a, tri.b)) {
+		dest[0] = tri.b;
+		dest[1] = tri.a;
+	}
+	// dest[0,2] =  sort(min(a,b), c)
+	if (pGt(dest[0], tri.c)) {
+		dest[2] = dest[0];
+		dest[0] = tri.c;
+	}
+	// dest[0,1] = sort(dest[0,1])
+	if (pGt(dest[0], dest[1])) {
+		point swap = dest[0];
+		dest[0] = dest[1];
+		dest[1] = swap;
+	}
+	if (pGt(dest[1], dest[2])) {
+		point swap = dest[1];
+		dest[1] = dest[2];
+		dest[2] = swap;
+	}
+}
+
+void SSortTriangle(triangle *tri) {
+	point p[3] = {0};
+	SortTriangle(*tri, p);
+	vApplyTriangle(tri, p);
+}
+
+void vApplyTriangle(triangle *tri, point *source) {
+	tri->a = source[0];
+	tri->b = source[1];
+	tri->c = source[2];
+}
+
+////triangle RotateTriangle(triangle tri, ang int) {
+////	point catmid = D1PointLerp(
+////			GetTriangleTop(tri),
+////			GetTriangleBot(tri)
+////	);
+////}
+//
+//// TODO: old name, plMake[p]Point is the new version
+point SPolarToCoord (polar plr) {
+	point pnt;
+	float a = plr.a*(PI/180);
+	pnt.x = plr.r*cos(a);
+	pnt.y = plr.r*sin(a);
+	return pnt;
+}
+
+ppoint PolarToCoord (polar plr) {
+	ppoint pnt;
+	float a = plr.a*(PI/180);
+	pnt.x = plr.r*cos(a);
+	pnt.y = plr.r*sin(a);
+	return pnt;
+}
+
 // transform
 point pMul(point p, int m) {
 	p.x = p.x*m;
@@ -229,26 +432,32 @@ point pAdd(point p, int a) {
 	return p;
 }
 
+int pSum(point p) {
+	return p.y+p.x;
+}
+
+point pAddp(point p, point a) {
+	p.x = p.x+a.x;
+	p.y = p.y+a.y;
+	return p;
+}
+
 point pSub(point p, int s) {
 	p.x = p.x-s;
 	p.y = p.y-s;
 	return p;
 }
 
-ppoint PolarToCoord (polar plr) {
-	ppoint pnt;
-	lfloat a = plr.a*(PI/180);
-	pnt.x = plr.r*cos(a);
-	pnt.y = plr.r*sin(a);
-	return pnt;
+inline bool pEq(point a, point b) {
+	return a.y == b.y && a.x == b.x;
 }
 
-point SPolarToCoord (polar plr) {
-	point pnt;
-	float a = plr.a*(PI/180);
-	pnt.x = plr.r*cos(a);
-	pnt.y = plr.r*sin(a);
-	return pnt;
+inline bool pGt(point a, point b) {
+	return GetDistance(a, __BUFFY_H_POINT_ZZ) > GetDistance(b, __BUFFY_H_POINT_ZZ);
+}
+
+inline bool pSt(point a, point b) {
+	return GetDistance(a, __BUFFY_H_POINT_ZZ) < GetDistance(b, __BUFFY_H_POINT_ZZ);
 }
 
 // lfloat = more precision than float
@@ -258,8 +467,14 @@ inline lfloat lerp(lfloat a, lfloat b, lfloat p) { // p = 0..1
 }
 
 // get
-
 inline ppoint D1PointLerp(point a, point b, lfloat t) { // t as in time
+	return MakepPoint(
+		lerp(a.y, b.y, t),
+		lerp(a.x, b.x, t)
+	);
+}
+
+inline ppoint D1pPointLerp(ppoint a, ppoint b, lfloat t) { // t as in time
 	return MakepPoint(
 		lerp(a.y, b.y, t),
 		lerp(a.x, b.x, t)
@@ -281,35 +496,39 @@ inline ppoint D1pLineLerp(pline l, lfloat t) { // t as in time
 }
 
 inline float GetDistance(const point a, const point b) {
-	return sqrt(
-		isquare(a.y-b.y)
-		+
-		isquare(a.x-b.x)
+	return sqrt( isquare(a.y-b.y) + isquare(a.x-b.x));
+}
+
+inline float GetADistance(const point a, const point b) {
+	return (
+		abs(a.y-b.y)+ abs(a.x-b.x)
 	);
 }
 
 inline point GetpDistance(const point a, const point b) {
+	return MakePoint(
+		a.y-b.y,
+		a.x-b.x
+	);
+}
+
+inline point GetpADistance(const point a, const point b) {
 	return MakePoint(
 		abs(a.y-b.y),
 		abs(a.x-b.x)
 	);
 }
 
-// can also be used to expand a line (if seg > 100)
-inline point GetPILSeg (line l, float seg) {
-	point dist = GetpDistance(l.a, l.b);
-	long double y = (float)dist.y / 100.0 * seg;
-	long double x = (float)dist.x / 100.0 * seg;
-	return MakePoint((int)y+l.a.y, (int)x+l.a.x);
-}
-
-inline point GetRayCast(const line l, const int expand) {
-	return GetPILSeg(l, (float)expand+100);
-}
-
-inline line RayCast(line l, const int expand) {
-	l.b = GetPILSeg(l, (float)expand+100);
-	return l;
+//TODO: GetAngle(p ref, p check) -> lfloat
+lfloat GetAngle(point reference, const point check) {
+	reference = pMul(reference, -1);
+	// invert reference
+	ppoint ato = pMakepPoint(pAddp(check, reference));
+	// distance to check from old reference = distance to check from 0,0
+	//if (!ato.x) {
+	//	return
+	//}
+	return atanl(ato.x/ato.y);
 }
 
 long int GetPixelPos ( struct fbjar jar, int y, int x ) {
@@ -337,7 +556,6 @@ bool PInP(point top, point bot, point check) {
 		bot.x > check.x
 	);
 }
-
 
 bool CheckPIJ (struct fbjar jar, point p) {
 	if ((uint)p.y >= jar.rows || (uint)p.x >= jar.cols) {
@@ -482,7 +700,11 @@ void ReadByteFbIntoBytesmap(struct fbjar jar, point top, bytesmap *b) {
 	b->cont = cont;
 }
 
-bytemap LoadBytemap(char *pathname) {
+// if in release mode
+// LoadBytemap will return 0 if OK
+// -1 if heigth can't be stored in ssize_t
+// -2 if width can't be stored in ssize_t
+int LoadBytemap(char *pathname, bytemap *b) {
 	FILE *rd = fopen(pathname, "r");
 
 	// size of width, width array
@@ -490,7 +712,11 @@ bytemap LoadBytemap(char *pathname) {
 	ssize_t w = 0, h = 0;
 	{
 		szh = (uint)getc(rd);
-		assert(szh < (uint)sizeof(ssize_t));
+#ifndef RELEASE
+		assert(szh <= (uint)sizeof(ssize_t));
+#else
+		if (szh > (uint)sizeof(ssize_t)) {return -1;}
+#endif
 		// decresent
 		byte ha[szh];
 		for (uint i = 0; i<szh; i++)  {
@@ -499,7 +725,13 @@ bytemap LoadBytemap(char *pathname) {
 
 
 		szw = (uint)getc(rd);
-		assert(szw < (uint)sizeof(ssize_t));
+
+#ifndef RELEASE
+			assert(szw <= (uint)sizeof(ssize_t));
+#else
+			if (szw > (uint)sizeof(ssize_t)) {return -2;}
+#endif
+
 		// decresent
 		byte wa[szw];
 		for (uint i = 0; i<szw; i++)  {
@@ -522,10 +754,9 @@ bytemap LoadBytemap(char *pathname) {
 	//read(rfd, cont, h*w);
 	fclose(rd);
 
-	bytemap b;
-	b.cont = cont;
-	b.width = w;
-	b.heigth = h;
+	b->cont = cont;
+	b->width = w;
+	b->heigth = h;
 
-	return b;
+	return 0;
 }
