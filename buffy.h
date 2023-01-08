@@ -80,19 +80,42 @@ typedef struct {
 	ppoint a, b;
 } pline;
 
+// sorted triangle = a = top, b = bot && c = cont
+// use SortTriangle(triangle tri, point *dest)
+// to make dest[] = top,cont,bot
+typedef struct {
+	point a, b, c;
+} triangle;
+
+typedef struct {
+	ppoint a, b, c;
+} ptriangle;
+
+typedef struct {
+	point a, b, c, d;
+} quad/*rilateral*/;
+
+typedef struct {
+	ppoint a, b, c, d;
+} pquad/*rilateral*/;
+
 // global jar
 struct fbjar GlobalJar;
+point __BUFFY_H_POINT_ZZ = {.y=0,.x=0};
 
+#include "protos.c" // prototypes for vars.c
 #include "vars.c"
 
-
-// func naming [(S)imple][(T)hick,(K)eep,(R)elative](Draw,Apply,Fill)
+// func naming [(q)uick][(S)imple][(T)hick,(K)eep,(R)elative](Draw,Apply,Fill)
 // var naming
 // points
 // top = < bot
 // bot = > top
 // len = bot-top (for (R)elative funcs)
+// cont = not bot nor top
+
 // include drawers
+#include "draw/protos.c" // prototypes for draw/*
 #include "draw/simple.c"
 #include "draw/normal.c"
 #include "draw/complex.c"
