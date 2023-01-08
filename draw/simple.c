@@ -1,7 +1,9 @@
 void SDrawAllLine (
 	struct fbjar jar, uint y
 ) {
+#ifndef RELEASE
 	assert(CheckInJar(jar, y, 0));
+#endif
 
 	uint8* location = GetFbPos(jar, y, 0);
 
@@ -11,7 +13,9 @@ void SDrawAllLine (
 void SDrawAllCollum (
 	struct fbjar jar, uint x
 ) {
+#ifndef RELEASE
 	assert(CheckInJar(jar, 0, x));
+#endif
 
 	uint8* location = GetFbPos(jar, 0, x);
 	uint y;
@@ -24,8 +28,10 @@ void SDrawAllCollum (
 }
 
 void SDrawPartLine (struct fbjar jar, uint y, uint StartX, uint EndX) {
+#ifndef RELEASE
 	assert(CheckInJar(jar, y, StartX));
 	assert(CheckInJar(jar, y, EndX));
+#endif
 
 	uint8* location = GetFbPos(jar, y, StartX);
 	uint Xlen = (EndX - StartX)*jar.bpp;
@@ -42,8 +48,10 @@ void SDrawPartCollum (
 		struct fbjar jar,
 		uint x, uint StartY, uint EndY
 ) {
+#ifndef RELEASE
 	assert(CheckInJar(jar, StartY, x));
 	assert(CheckInJar(jar, EndY, x));
+#endif
 
 	uint8* location = GetFbPos(jar, StartY, x);
 	uint Ylen = (EndY - StartY);
@@ -71,8 +79,10 @@ void SRFillRectangle (
 	struct fbjar jar,
 	point top, point bot
 ) {
+#ifndef RELEASE
 	assert(CheckInJar(jar, bot.y+top.y, bot.x+top.x));
 	assert(CheckPIJ(jar, top));
+#endif
 	uint8* location = GetFbPnt(jar, top);
 	uint limy = (uint)bot.y*jar.skip;
 	uint limx = (uint)bot.x*jar.bpp;
@@ -86,8 +96,10 @@ void SFillRectangle (
 	struct fbjar jar,
 	point top, point bot
 ) {
+#ifndef RELEASE
 	assert(CheckPIJ(jar, top));
 	assert(CheckPIJ(jar, bot));
+#endif
 	uint8* location = GetFbPnt(jar, top);
 	uint limy = (uint)(top.y-bot.y)*jar.skip;
 	uint limx = (uint)(top.x-bot.x)*jar.bpp;
@@ -96,6 +108,7 @@ void SFillRectangle (
 	}
 }
 
+//TODO make safe
 void SDrawPolarLine(
 	struct fbjar jar,
 	point top, polar bot
@@ -116,8 +129,10 @@ void SDrawCircle (
 	point top, int r
 ) {
 	point bot = MakePoint(top.y+r+r, top.x+r+r);
+#ifndef RELEASE
 	assert(CheckPIJ(jar, bot));
 	assert(CheckPIJ(jar, top));
+#endif
 
 	uint8* location = GetFbPnt(jar, top);
 	int sr = -(r*r);
@@ -141,8 +156,10 @@ void SFillCircle (
 	point top, int r
 ) {
 	point bot = MakePoint(top.y+r+r, top.x+r+r);
+#ifndef RELEASE
 	assert(CheckPIJ(jar, bot));
 	assert(CheckPIJ(jar, top));
+#endif
 
 	uint8* location = GetFbPnt(jar, top);
 	int sr = -(r*r);
@@ -160,9 +177,10 @@ void SFillCircle (
 
 //unsanfe
 void SDrawBitmap (struct fbjar jar, bitmap bmap, point top) {
+	#ifndef RELEASE
 	assert(CheckPIJ(jar, top));
-	//TODO make map funcs safe
-	//assert(CheckPIJ(jar, bot));
+	assert(CheckInJar(jar, top.y+bmap.heigth, top.x+bmap.width));
+	#endif
 
 	uint8* location = GetFbPnt(jar, top);
 	for (uint i = 0 ; i<(bmap.heigth); i++) {
@@ -179,6 +197,11 @@ void SDrawBitmap (struct fbjar jar, bitmap bmap, point top) {
 
 //unsanfe
 void SApplyBitmap (struct fbjar jar, bitmap bmap, point top) {
+#ifndef RELEASE
+	assert(CheckPIJ(jar, top));
+	assert(CheckInJar(jar, top.y+bmap.heigth, top.x+bmap.width));
+#endif
+
 	uint8* location = GetFbPnt(jar, top);
 	for (uint i = 0 ; i<(bmap.heigth); i++) {
 		for (uint j = 0 ; j<(bmap.width) ; j++) {
@@ -196,6 +219,11 @@ void SApplyBitmap (struct fbjar jar, bitmap bmap, point top) {
 
 //unsanfe
 void SDrawBytemap (struct fbjar jar, bytemap bmap, point top) {
+#ifndef RELEASE
+	assert(CheckPIJ(jar, top));
+	assert(CheckInJar(jar, top.y+bmap.heigth, top.x+bmap.width));
+#endif
+
 	uint8* location = GetFbPnt(jar, top);
 	for (uint i = 0 ; i<(bmap.heigth); i++) {
 		for (uint j = 0 ; j<(bmap.width) ; j++) {
@@ -228,7 +256,9 @@ void SApplyBytemap (struct fbjar jar, bytemap bmap, point top) {
 }
 
 void SDrawPoint (struct fbjar jar, point at) {
+#ifndef RELEASE
 	assert(CheckPIJ(jar, at));
+#endif
 
 	uint8* location = GetFbPnt(jar, at);
 	location[0] = 255;
@@ -242,7 +272,16 @@ void SDrawpPoint (struct fbjar jar, ppoint at) {
 
 // precision = how many pixels (+1)
 void SDrawLine(struct fbjar jar, line l, lfloat p) {
-	for (lfloat t = 0; t < 1.01; t+=1/p) {
-		SDrawPoint(jar, pMakePoint(D1LineLerp(l, t)));
+	for (lfloat t = 0; t <= 1; t+=1/p) {
+		SDrawpPoint(jar, D1LineLerp(l, t));
 	}
 }
+
+void SDrawTiangle(struct fbjar jar, triangle tri, lfloat p) {
+	for (lfloat t = 0; t <= 1; t+=1/p) {
+		SDrawpPoint(jar, D1PointLerp(tri.a, tri.b, t));
+		SDrawpPoint(jar, D1PointLerp(tri.b, tri.c, t));
+		SDrawpPoint(jar, D1PointLerp(tri.c, tri.a, t));
+	}
+}
+
