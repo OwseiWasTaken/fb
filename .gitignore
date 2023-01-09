@@ -1,5 +1,7 @@
 *.txt
 *.vim
 *.sh
+*.zsh
 examples/bin
 test.*
+examples/release
