@@ -21,7 +21,7 @@ var (
 		"bmap":MAP_bit,
 		"bimap":MAP_bit,
 		"bim":MAP_bit,
-		"bi":MAP_bit
+		"bi":MAP_bit,
 
 		"byte":MAP_byte,
 		"bytem":MAP_byte,
@@ -32,7 +32,7 @@ var (
 		"bytmap":MAP_byte,
 		"btmap":MAP_byte,
 		"btm":MAP_byte,
-		"bt":MAP_byte // bruh
+		"bt":MAP_byte, // bruh
 
 		"bite":MAP_byte,
 		"bitem":MAP_byte,
