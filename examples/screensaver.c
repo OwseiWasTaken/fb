@@ -14,7 +14,6 @@ int main ( int argc, char **argv ) {
 	ppoint speed;
 	polar aspd;
 	ppoint ball = MakepPoint((float)jar.rows/2, (float)jar.cols/2);
-	point upball = MakePoint(jar.rows/2, jar.cols/2);
 
 	do {
 		aspd = GetSpeed();
@@ -59,12 +58,17 @@ int main ( int argc, char **argv ) {
 			PaintBall.B = atoi(argv[i]);
 		}
 	}
-	speed = PolarToCoord(aspd);
+	speed = PolarTopCoord(aspd, __BUFFY_H_POINT_ZZ);
+#ifndef RELEASE
+	printf("r:%Lf, %Lf°\n", aspd.r, aspd.a);
+#endif
+	HideCursor();
+	// 3°30
+	// 32°5
 
 	while (1) {
 		ball = ppMovepPoint(ball, speed); // to ball, apply speed
-		upball = pMakePoint(ball);
-		if (!CheckPIJ(jar, upball)) {
+		if (!CheckpPIJ(jar, ball)) {
 			if (ball.x >= jar.cols || ball.x < 0) {
 				speed.x = -speed.x;
 			}
@@ -72,12 +76,12 @@ int main ( int argc, char **argv ) {
 				speed.y = -speed.y;
 			}
 			ball = ppMovepPoint(ball, speed); // to ball, apply speed
-			upball = pMakePoint(ball);
 		}
-		//TODO: make unsafe version of draw funcs
-		DrawPoint(jar, upball, PaintBall);
-		usleep(slp);
-		DrawPoint(jar, upball, trail);
+		if (CheckpPIJ(jar, ball)) {
+			DrawpPoint(jar, ball, PaintBall);
+			if (slp) usleep(slp);
+			DrawpPoint(jar, ball, trail);
+		}
 	}
 
 	CloseFb(jar);
