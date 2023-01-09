@@ -108,11 +108,13 @@ void SFillRectangle (
 	}
 }
 
-//TODO make safe
 void SDrawPolarLine(
 	struct fbjar jar,
 	point top, polar bot
 ) {
+#ifndef RELEASE
+	CheckPIJ(jar, PolarToCoord(bot, top));
+#endif
 	polar now;
 	now.a = bot.a;
 	for ( now.r = 0; now.r<bot.r; now.r++) {
