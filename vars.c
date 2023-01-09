@@ -396,7 +396,8 @@ void vApplyTriangle(triangle *tri, point *source) {
 ////	);
 ////}
 //
-//// TODO: old name, plMake[p]Point is the new version
+
+//TODO: plMakePoint instead of transform name
 point SPolarToCoord (polar plr) {
 	point pnt;
 	float a = plr.a*(PI/180);
@@ -405,11 +406,11 @@ point SPolarToCoord (polar plr) {
 	return pnt;
 }
 
-ppoint PolarToCoord (polar plr) {
+ppoint PolarTopCoord (polar plr, point from) {
 	ppoint pnt;
 	float a = plr.a*(PI/180);
-	pnt.x = plr.r*cos(a);
-	pnt.y = plr.r*sin(a);
+	pnt.y = from.y+plr.r*sin(a);
+	pnt.x = from.x+plr.r*cos(a);
 	return pnt;
 }
 
@@ -561,6 +562,17 @@ bool CheckPIJ (struct fbjar jar, point p) {
 	if ((uint)p.y >= jar.rows || (uint)p.x >= jar.cols) {
 		fprintf( jar.log,
 			"y:%d max: %d, x:%d max: %d\n",
+			p.y, jar.rows, p.x, jar.cols);
+		fflush(jar.log);
+		return false;
+	}
+	return true;
+}
+
+bool CheckpPIJ (struct fbjar jar, ppoint p) {
+	if ((uint)lroundl(p.y) >= jar.rows || (uint)lroundl(p.x) >= jar.cols) {
+		fprintf( jar.log,
+			"y:%.2Lf max: %i, x:%.2Lf max: %i\n",
 			p.y, jar.rows, p.x, jar.cols);
 		fflush(jar.log);
 		return false;
