@@ -206,7 +206,9 @@ void FillCircle (
 	}
 }
 
-void DrawBitmap (struct fbjar jar, bitmap bmap, point top, color RGB) {
+void DrawBitmap (
+	struct fbjar jar, bitmap bmap, point top, color RGB
+) {
 #ifndef RELEASE
 	assert(CheckPIJ(jar, top));
 	assert(CheckInJar(jar, top.y+bmap.heigth, top.x+bmap.width));
@@ -226,7 +228,9 @@ void DrawBitmap (struct fbjar jar, bitmap bmap, point top, color RGB) {
 	}
 }
 
-void ApplyBitmap (struct fbjar jar, bitmap bmap, point top, color RGB) {
+void ApplyBitmap (
+	struct fbjar jar, bitmap bmap, point top, color RGB
+) {
 #ifndef RELEASE
 	assert(CheckPIJ(jar, top));
 	assert(CheckInJar(jar, top.y+bmap.heigth, top.x+bmap.width));
@@ -247,7 +251,10 @@ void ApplyBitmap (struct fbjar jar, bitmap bmap, point top, color RGB) {
 	}
 }
 
-bytesmap SaveBytes ( struct fbjar jar, point top, point bot) {
+//TODO: vars.c
+bytesmap SaveBytes (
+	struct fbjar jar, point top, point bot
+) {
 #ifndef RELEASE
 	assert(CheckPIJ(jar, top));
 	assert(CheckPIJ(jar, bot));
@@ -297,7 +304,9 @@ bytesmap RSaveBytes ( struct fbjar jar, point top, upoint len) {
 	return map;
 }
 
-void DrawBytesmap ( struct fbjar jar, bytesmap map, point top) {
+void DrawBytesmap (
+	struct fbjar jar, bytesmap map, point top
+) {
 	point len = MakePoint(map.heigth, map.width);
 #ifndef RELEASE
 	assert(CheckPIJ(jar, top));
@@ -316,7 +325,9 @@ void DrawBytesmap ( struct fbjar jar, bytesmap map, point top) {
 	}
 }
 
-void ApplyBytesmap ( struct fbjar jar, bytesmap map, point top) {
+void ApplyBytesmap (
+	struct fbjar jar, bytesmap map, point top
+) {
 	point len = MakePoint((int)map.heigth, (int)map.width);
 #ifndef RELEASE
 	assert(CheckPIJ(jar, top));
@@ -340,7 +351,9 @@ void ApplyBytesmap ( struct fbjar jar, bytesmap map, point top) {
 }
 
 // RGB
-void DrawBytemap (struct fbjar jar, bytemap bmap, point top, uint chan) {
+void DrawBytemap (
+	struct fbjar jar, bytemap bmap, point top, uint chan
+) {
 	uint8* location = GetFbPos(jar, top.y, top.x);
 	uint chanb, chang, chanr;
 
@@ -361,7 +374,9 @@ void DrawBytemap (struct fbjar jar, bytemap bmap, point top, uint chan) {
 	}
 }
 
-void ApplyBytemap (struct fbjar jar, bytemap bmap, point top, uint chan) {
+void ApplyBytemap (
+	struct fbjar jar, bytemap bmap, point top, uint chan
+) {
 	uint8* location = GetFbPos(jar, top.y, top.x);
 	uint chanb, chang, chanr;
 	chanr = (chan&CHAN_R)>>2?2:3;
@@ -381,7 +396,9 @@ void ApplyBytemap (struct fbjar jar, bytemap bmap, point top, uint chan) {
 	}
 }
 
-void DrawPoint (struct fbjar jar, point at, color col) {
+void DrawPoint (
+	struct fbjar jar, point at, color col
+) {
 #ifndef RELEASE
 	assert(CheckPIJ(jar, at));
 #endif
@@ -392,18 +409,32 @@ void DrawPoint (struct fbjar jar, point at, color col) {
 	location[2] = col.R;
 }
 
-void DrawpPoint (struct fbjar jar, ppoint at, color col) {
+void DrawpPoint (
+	struct fbjar jar, ppoint at, color col
+) {
 	DrawPoint(jar, pMakePoint(at), col);
 }
 
 // precision = how many pixels will be drawn (p+1)
-void DrawLine (struct fbjar jar, line l, lfloat p, color col) {
+void DrawLine (
+	struct fbjar jar, line l, lfloat p, color col
+) {
 	for (lfloat t = 0; t < 1; t+=1/p) {
 		DrawPoint(jar, pMakePoint(D1LineLerp(l, t)), col);
 	}
 }
 
-void DrawTiangle (struct fbjar jar, triangle tri, lfloat p, color col) {
+void pDrawLine (
+	struct fbjar jar, point a, point b, lfloat p, color col
+) {
+	for (lfloat t = 0; t < 1; t+=1/p) {
+		DrawPoint(jar, pMakePoint(D1PointLerp(a, b, t)), col);
+	}
+}
+
+void DrawTiangle (
+	struct fbjar jar, triangle tri, lfloat p, color col
+) {
 	for (lfloat t = 0; t <= 1; t+=1/p) {
 		DrawpPoint(jar, D1PointLerp(tri.a, tri.b, t), col);
 		DrawpPoint(jar, D1PointLerp(tri.b, tri.c, t), col);
