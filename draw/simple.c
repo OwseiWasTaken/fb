@@ -27,7 +27,9 @@ void SDrawAllCollum (
 	}
 }
 
-void SDrawPartLine (struct fbjar jar, uint y, uint StartX, uint EndX) {
+void SDrawPartLine (
+	struct fbjar jar, uint y, uint StartX, uint EndX
+) {
 #ifndef RELEASE
 	assert(CheckInJar(jar, y, StartX));
 	assert(CheckInJar(jar, y, EndX));
@@ -113,7 +115,7 @@ void SDrawPolarLine(
 	point top, polar bot
 ) {
 #ifndef RELEASE
-	CheckPIJ(jar, PolarToCoord(bot, top));
+	CheckpPIJ(jar, PolarTopCoord(bot, top));
 #endif
 	polar now;
 	now.a = bot.a;
@@ -178,7 +180,9 @@ void SFillCircle (
 }
 
 //unsanfe
-void SDrawBitmap (struct fbjar jar, bitmap bmap, point top) {
+void SDrawBitmap (
+	struct fbjar jar, bitmap bmap, point top
+) {
 	#ifndef RELEASE
 	assert(CheckPIJ(jar, top));
 	assert(CheckInJar(jar, top.y+bmap.heigth, top.x+bmap.width));
@@ -198,7 +202,9 @@ void SDrawBitmap (struct fbjar jar, bitmap bmap, point top) {
 }
 
 //unsanfe
-void SApplyBitmap (struct fbjar jar, bitmap bmap, point top) {
+void SApplyBitmap (
+	struct fbjar jar, bitmap bmap, point top
+) {
 #ifndef RELEASE
 	assert(CheckPIJ(jar, top));
 	assert(CheckInJar(jar, top.y+bmap.heigth, top.x+bmap.width));
@@ -220,7 +226,9 @@ void SApplyBitmap (struct fbjar jar, bitmap bmap, point top) {
 }
 
 //unsanfe
-void SDrawBytemap (struct fbjar jar, bytemap bmap, point top) {
+void SDrawBytemap (
+	struct fbjar jar, bytemap bmap, point top
+) {
 #ifndef RELEASE
 	assert(CheckPIJ(jar, top));
 	assert(CheckInJar(jar, top.y+bmap.heigth, top.x+bmap.width));
@@ -241,7 +249,9 @@ void SDrawBytemap (struct fbjar jar, bytemap bmap, point top) {
 }
 
 //unsanfe
-void SApplyBytemap (struct fbjar jar, bytemap bmap, point top) {
+void SApplyBytemap (
+	struct fbjar jar, bytemap bmap, point top
+) {
 	uint8* location = GetFbPnt(jar, top);
 	for (uint i = 0 ; i<(bmap.heigth); i++) {
 		for (uint j = 0 ; j<(bmap.width) ; j++) {
@@ -257,7 +267,9 @@ void SApplyBytemap (struct fbjar jar, bytemap bmap, point top) {
 	}
 }
 
-void SDrawPoint (struct fbjar jar, point at) {
+void SDrawPoint (
+	struct fbjar jar, point at
+) {
 #ifndef RELEASE
 	assert(CheckPIJ(jar, at));
 #endif
@@ -268,18 +280,24 @@ void SDrawPoint (struct fbjar jar, point at) {
 	location[2] = 255;
 }
 
-void SDrawpPoint (struct fbjar jar, ppoint at) {
+void SDrawpPoint (
+	struct fbjar jar, ppoint at
+) {
 	SDrawPoint(jar, pMakePoint(at));
 }
 
 // precision = how many pixels (+1)
-void SDrawLine(struct fbjar jar, line l, lfloat p) {
+void SDrawLine (
+	struct fbjar jar, line l, lfloat p
+) {
 	for (lfloat t = 0; t <= 1; t+=1/p) {
 		SDrawpPoint(jar, D1LineLerp(l, t));
 	}
 }
 
-void SDrawTiangle(struct fbjar jar, triangle tri, lfloat p) {
+void SDrawTiangle (
+	struct fbjar jar, triangle tri, lfloat p
+) {
 	for (lfloat t = 0; t <= 1; t+=1/p) {
 		SDrawpPoint(jar, D1PointLerp(tri.a, tri.b, t));
 		SDrawpPoint(jar, D1PointLerp(tri.b, tri.c, t));
