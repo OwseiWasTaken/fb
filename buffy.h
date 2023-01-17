@@ -80,7 +80,7 @@ typedef struct {
 	ppoint a, b;
 } pline;
 
-// sorted triangle = a = top, b = bot && c = cont
+// sorted triangle = {a = top, b = control & c = bot}
 // use SortTriangle(triangle tri, point *dest)
 // to make dest[] = top,cont,bot
 typedef struct {
@@ -104,6 +104,7 @@ struct fbjar GlobalJar;
 point __BUFFY_H_POINT_ZZ = {.y=0,.x=0};
 
 #include "protos.c" // prototypes for vars.c
+#include "draw/protos.c" // prototypes for draw/*
 #include "vars.c"
 
 // func naming [(q)uick][(S)imple][(T)hick,(K)eep,(R)elative](Draw,Apply,Fill)
@@ -115,7 +116,6 @@ point __BUFFY_H_POINT_ZZ = {.y=0,.x=0};
 // cont = not bot nor top
 
 // include drawers
-#include "draw/protos.c" // prototypes for draw/*
 #include "draw/simple.c"
 #include "draw/normal.c"
 #include "draw/complex.c"
