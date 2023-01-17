@@ -84,13 +84,21 @@ ppoint PolarToCoord (polar plr);
 
 point pMul(point p, int m);
 
+ppoint ppMul(ppoint p, int m);
+
 point pDiv(point p, int d);
 
 point pAdd(point p, int a);
 
 point pAddp(point p, point a);
 
+point pAddpp(point p, ppoint a);
+
 point pSub(point p, int s);
+
+point pSubp(point p, point s);
+
+point pSubpp(point p, ppoint s);
 
 bool pEq(point a, point b);
 
@@ -109,6 +117,8 @@ ppoint D1LineLerp(line l, lfloat t);
 ppoint D2pLineLerp(pline l, lfloat t);
 
 float GetDistance(const point a, const point b);
+
+lfloat pGetDistance(const ppoint a, const point b);
 
 float GetADistance(const point a, const point b);
 

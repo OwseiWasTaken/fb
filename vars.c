@@ -1,5 +1,9 @@
 //funcs
 
+void _P_polar (polar pl) {
+	printf("r:%Lf, ang:%Lf\n", pl.r, pl.a);
+}
+
 void _P_point (point p) {
 	printf("y:%i, x:%i\n", p.y, p.x);
 }
@@ -188,7 +192,7 @@ struct fbjar InitBuffy() {
 	return jar;
 }
 
-// make
+// Make
 point MakePoint(const int y, const int x) {
 	point p = {.y = y, .x = x};
 	return p;
@@ -239,6 +243,31 @@ polar MakePolar(const float r, const float a) {
 	return p;
 }
 
+//TODO: just, please
+polar pMakePolar(const point p) {
+	polar ret;
+	ret.r = GetDistance(p, __BUFFY_H_POINT_ZZ);
+	if (!p.y) {
+		if (p.y > 0) {
+			ret.a = 270;
+		} else if (p.y) {
+			ret.a = 90;
+		} else {
+			ret.a = 0;
+		}
+	} else {
+		ret.a = atanl(p.y/p.x)*180.0/PI;
+	}
+	return ret;
+}
+
+polar ppMakePolar(const ppoint p) {
+	polar ret;
+	ret.a = atanl(p.y/p.x)*(180.0/PI);
+	ret.r = pGetDistance(p, __BUFFY_H_POINT_ZZ);
+	return ret;
+}
+
 triangle MakeTriangle(const point a, const point b, const point c) {
 	triangle t = {.a = a, .b = b, .c = c};
 	return t;
@@ -261,6 +290,16 @@ point pMovePoint(const point p, const point d /*diff*/ ) {
 	return r;
 }
 
+point ppMovePoint(const point p, const ppoint d /*diff*/ ) {
+	point r = {.y = p.y+d.y, .x = p.x+d.x};
+	return r;
+}
+
+ppoint MovepPoint(const ppoint p, const int y, const int x) {
+	ppoint r = {.y = p.y+y, .x = p.x+x};
+	return r;
+}
+
 ppoint pMovepPoint(const ppoint p, const point d /*diff*/ ) {
 	ppoint r = {.y = p.y+(lfloat)d.y, .x = p.x+(lfloat)d.x};
 	return r;
@@ -270,6 +309,30 @@ ppoint ppMovepPoint(const ppoint p, const ppoint d /*diff*/ ) {
 	ppoint r = {.y = p.y+d.y, .x = p.x+d.x};
 	return r;
 }
+
+polar MovePolar(const polar pl, const int y, const int x) {
+	return ppMakePolar(MovepPoint(plMakepPoint(pl), y, x));
+}
+
+polar pMovePolar(const polar pl, const point p) {
+	return ppMakePolar(pMovepPoint(plMakepPoint(pl), p));
+}
+
+polar RotatePolar(polar pl, int ang) {
+	pl.a+=ang;
+	return pl;
+}
+
+//TODO: plMovePolar
+//polar plMovePolar(const polar pl) {
+//
+//}
+
+polar ppMovePolar(const polar pl, const ppoint p) {
+	return ppMakePolar(ppMovepPoint(plMakepPoint(pl), p));
+}
+
+//TODO: [pl]RotatePolar
 
 line LineSwap(line l) {
 	point t = l.b;
@@ -347,8 +410,6 @@ point GetTriangleCont(triangle tri) {
 	return tri.c;
 }
 
-// TODO: SortTriangle GetTriangleCont uses info from the other funcs
-// optmize that by storing these value instead of running them
 // top, cont, bot
 void SortTriangle(triangle tri, point *dest) {
 	dest[0] = tri.a;
@@ -389,13 +450,67 @@ void vApplyTriangle(triangle *tri, point *source) {
 	tri->c = source[2];
 }
 
-////triangle RotateTriangle(triangle tri, ang int) {
-////	point catmid = D1PointLerp(
-////			GetTriangleTop(tri),
-////			GetTriangleBot(tri)
-////	);
-////}
-//
+point GetLineMid(line l) {
+	return pMakePoint(D1LineLerp(l, 0.5));
+}
+
+point GetPointsMid(point a, point b) {
+	return pMakePoint(D1PointLerp(a, b, 0.5));
+}
+
+ppoint pGetLineMid(line l) {
+	return D1LineLerp(l, 0.5);
+}
+
+ppoint pGetPointsMid(point a, point b) {
+	return D1PointLerp(a, b, 0.5);
+}
+
+triangle RotateTriangle(triangle tri, int ang) {
+	point p[3] = {0};
+	SortTriangle(tri, p);
+	ppoint mid = pGetPointsMid(
+		p[1], // control
+		GetPointsMid(
+			p[0], // top
+			p[2] // bot
+		)
+	);
+	TDrawpPoint(GlobalJar, mid, RGB(255,128,0), 5);
+	mid = ppMul(mid, -1);
+	tri.a = ppMovePoint(tri.a, mid);
+	tri.b = ppMovePoint(tri.b, mid);
+	tri.c = ppMovePoint(tri.c, mid);
+	mid = ppMul(mid, -1);
+
+	polar a = pMakePolar(tri.a);
+	polar b = pMakePolar(tri.b);
+	polar c = pMakePolar(tri.c);
+
+	SDrawPolarLine(GlobalJar, pMakePoint(mid), a);
+	SDrawPolarLine(GlobalJar, pMakePoint(mid), b);
+	SDrawPolarLine(GlobalJar, pMakePoint(mid), c);
+
+	_P_polar(a);
+	_P_polar(b);
+	_P_polar(c);
+	a = RotatePolar(a, ang);
+	b = RotatePolar(b, ang);
+	c = RotatePolar(c, ang);
+	_P_polar(a);
+	_P_polar(b);
+	_P_polar(c);
+
+	DrawPolarLine(GlobalJar, pMakePoint(mid), a, RGB(128, 128, 128));;
+	DrawPolarLine(GlobalJar, pMakePoint(mid), b, RGB(128, 128, 128));
+	DrawPolarLine(GlobalJar, pMakePoint(mid), c, RGB(128, 128, 128));
+
+	return MakeTriangle(
+		pAddpp(plMakePoint(RotatePolar(pMakePolar(tri.a), ang)), mid),
+		pAddpp(plMakePoint(RotatePolar(pMakePolar(tri.b), ang)), mid),
+		pAddpp(plMakePoint(RotatePolar(pMakePolar(tri.c), ang)), mid)
+	);
+}
 
 //TODO: plMakePoint instead of transform name
 point SPolarToCoord (polar plr) {
@@ -421,6 +536,12 @@ point pMul(point p, int m) {
 	return p;
 }
 
+ppoint ppMul(ppoint p, int m) {
+	p.x = p.x*m;
+	p.y = p.y*m;
+	return p;
+}
+
 point pDiv(point p, int d) {
 	p.x = p.x/d;
 	p.y = p.y/d;
@@ -433,11 +554,13 @@ point pAdd(point p, int a) {
 	return p;
 }
 
-int pSum(point p) {
-	return p.y+p.x;
+point pAddp(point p, point a) {
+	p.x = p.x+a.x;
+	p.y = p.y+a.y;
+	return p;
 }
 
-point pAddp(point p, point a) {
+point pAddpp(point p, ppoint a) {
 	p.x = p.x+a.x;
 	p.y = p.y+a.y;
 	return p;
@@ -447,6 +570,22 @@ point pSub(point p, int s) {
 	p.x = p.x-s;
 	p.y = p.y-s;
 	return p;
+}
+
+point pSubp(point p, point s) {
+	p.x = p.x-s.x;
+	p.y = p.y-s.y;
+	return p;
+}
+
+point pSubpp(point p, ppoint s) {
+	p.x = p.x-s.x;
+	p.y = p.y-s.y;
+	return p;
+}
+
+int pSum(point p) {
+	return p.y+p.x;
 }
 
 inline bool pEq(point a, point b) {
@@ -498,6 +637,14 @@ inline ppoint D1pLineLerp(pline l, lfloat t) { // t as in time
 
 inline float GetDistance(const point a, const point b) {
 	return sqrt( isquare(a.y-b.y) + isquare(a.x-b.x));
+}
+
+inline lfloat pGetDistance(const ppoint a, const point b) {
+	return sqrtl( powl(a.y-b.y, 2) + powl(a.x-b.x, 2));
+}
+
+inline lfloat ppGetDistance(const ppoint a, const ppoint b) {
+	return sqrtl( powl(a.y-b.y, 2) + powl(a.x-b.x, 2));
 }
 
 inline float GetADistance(const point a, const point b) {
