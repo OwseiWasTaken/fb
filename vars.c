@@ -157,7 +157,6 @@ struct fbjar InitMemJar () {
 }
 
 void CloseFb(struct fbjar jar) {
-	munmap(jar.fbmem, jar.screensize);
 	fflush(jar.log);
 	fclose(jar.log);
 	jar.tty = NULL;
@@ -168,15 +167,23 @@ void SHandleInt( int sig ) {
 	ShowCursor();
 	CloseFb(GlobalJar);
 	printf("kill sig: %d SIGINT\n", sig);
+	printf("killing family\n");
+	kill(0, 2);
 	exit(129);
 }
 
 // easy interact
 void StopBuffy(struct fbjar jar) {
-	if (GlobalJar.tty != NULL){
+	if (GlobalJar.tty){
 		CloseFb(GlobalJar);
-	} else {
-		CloseFb(jar);
+	}
+	if (jar.tty) {
+		if (jar.fd == -1) { // malloc, not mmap
+			free(jar.fbmem);
+		} else {
+			CloseFb(jar);
+			munmap(jar.fbmem, jar.screensize);
+		}
 	}
 }
 
