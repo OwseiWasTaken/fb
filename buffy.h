@@ -42,7 +42,7 @@ struct fbjar {
 	uint skip; // skip from y to y+1 (in bytes)
 	uint rows, cols;
 	unsigned long int screensize;
-	uint fd;
+	int fd;
 	FILE* log;
 	char* tty;
 };
@@ -57,9 +57,9 @@ typedef struct {
 
 // one byte for pixel
 // but i'm thinking of
-//  only using 4 or
-//  2 bits for each pixel
-//  and give up some intensity control
+//	only using 4 or
+//	2 bits for each pixel
+//	and give up some intensity control
 // full control intensity, for now
 typedef struct {
 	byte* cont;
